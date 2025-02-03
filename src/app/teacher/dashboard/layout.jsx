@@ -1,36 +1,47 @@
+// Enable client-side rendering for this component
 "use client";
+
+// Import React hooks
 import { useState } from "react";
+// Next.js navigation imports
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+// Headless UI components for dialog/modal functionality
 import {
   Dialog,
   DialogBackdrop,
   DialogPanel,
   TransitionChild,
 } from "@headlessui/react";
+// Heroicons for UI elements
 import {
-  Bars3Icon,
-  XMarkIcon,
-  ChartPieIcon,
-  BookOpenIcon,
-  ChatBubbleLeftIcon,
-  CurrencyDollarIcon,
-  Cog6ToothIcon,
+  Bars3Icon, // Mobile menu icon
+  XMarkIcon, // Close icon
+  ChartPieIcon, // Dashboard icon
+  BookOpenIcon, // Courses icon
+  ChatBubbleLeftIcon, // Communication icon
+  CurrencyDollarIcon, // Revenue icon
+  Cog6ToothIcon, // Settings icon
 } from "@heroicons/react/24/outline";
 
+// Utility function to combine class names conditionally
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
+// Main layout component for dashboard
 export default function DashboardLayout({ children }) {
+  // State management for mobile sidebar
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Get current path for active link styling
   const pathname = usePathname();
 
+  // Navigation configuration array
   const navigation = [
     {
       name: "Dashboard",
       href: "/teacher/dashboard",
-      icon: ChartPieIcon,
+      icon: ChartPieIcon, // Associated icon component
     },
     {
       name: "Courses",
@@ -57,21 +68,25 @@ export default function DashboardLayout({ children }) {
   return (
     <>
       <div>
+        {/* Mobile sidebar dialog */}
         <Dialog
-          open={sidebarOpen}
-          onClose={setSidebarOpen}
-          className="relative z-50 lg:hidden"
+          open={sidebarOpen} // Controlled by sidebarOpen state
+          onClose={setSidebarOpen} // Close handler
+          className="relative z-50 lg:hidden" // Hide on desktop
         >
+          {/* Backdrop for mobile sidebar */}
           <DialogBackdrop
             transition
             className="fixed inset-0 bg-gray-900/80 transition-opacity duration-300 ease-linear data-closed:opacity-0"
           />
 
+          {/* Mobile sidebar container */}
           <div className="fixed inset-0 flex">
             <DialogPanel
               transition
               className="relative mr-16 flex w-full max-w-xs flex-1 transform transition duration-300 ease-in-out data-closed:-translate-x-full"
             >
+              {/* Close button for mobile sidebar */}
               <TransitionChild>
                 <div className="absolute top-0 left-full flex w-16 justify-center pt-5 duration-300 ease-in-out data-closed:opacity-0">
                   <button
@@ -87,8 +102,10 @@ export default function DashboardLayout({ children }) {
                   </button>
                 </div>
               </TransitionChild>
-              {/* Sidebar component, swap this element with another sidebar if you like */}
+
+              {/* Mobile sidebar content */}
               <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-2 ring-1 ring-white/10">
+                {/* Logo section */}
                 <div className="flex h-16 shrink-0 items-center gap-2">
                   <img
                     alt="Your Company"
@@ -97,6 +114,8 @@ export default function DashboardLayout({ children }) {
                   />
                   <h1 className="text-white">Devnito</h1>
                 </div>
+
+                {/* Navigation links */}
                 <nav className="flex flex-1 flex-col">
                   <ul role="list" className="flex flex-1 flex-col gap-y-7">
                     <li>
@@ -107,11 +126,12 @@ export default function DashboardLayout({ children }) {
                               href={item.href}
                               className={classNames(
                                 pathname === item.href
-                                  ? "bg-gray-800 text-primary"
-                                  : "text-gray-400 hover:bg-gray-800 hover:text-white",
+                                  ? "bg-gray-800 text-primary" // Active state
+                                  : "text-gray-400 hover:bg-gray-800 hover:text-white", // Inactive state
                                 "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
                               )}
                             >
+                              {/* Navigation icon with dynamic styling */}
                               <item.icon
                                 className={classNames(
                                   pathname === item.href
@@ -134,10 +154,11 @@ export default function DashboardLayout({ children }) {
           </div>
         </Dialog>
 
-        {/* Static sidebar for desktop */}
+        {/* Desktop sidebar */}
         <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-          {/* Sidebar component, swap this element with another sidebar if you like */}
+          {/* Desktop sidebar content */}
           <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6">
+            {/* Logo section */}
             <div className="flex h-16 shrink-0 items-center gap-2">
               <img
                 alt="Your Company"
@@ -146,6 +167,8 @@ export default function DashboardLayout({ children }) {
               />
               <h1 className="text-white">Devnito</h1>
             </div>
+
+            {/* Navigation links */}
             <nav className="flex flex-1 flex-col">
               <ul role="list" className="flex flex-1 flex-col gap-y-7">
                 <li>
@@ -177,6 +200,7 @@ export default function DashboardLayout({ children }) {
                   </ul>
                 </li>
 
+                {/* Profile section */}
                 <li className="-mx-6 mt-auto">
                   <a
                     href="#"
@@ -196,7 +220,9 @@ export default function DashboardLayout({ children }) {
           </div>
         </div>
 
+        {/* Mobile header */}
         <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-gray-900 px-4 py-4 shadow-xs sm:px-6 lg:hidden">
+          {/* Mobile menu button */}
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
@@ -205,9 +231,13 @@ export default function DashboardLayout({ children }) {
             <span className="sr-only">Open sidebar</span>
             <Bars3Icon aria-hidden="true" className="size-6" />
           </button>
+
+          {/* Page title */}
           <div className="flex-1 text-sm/6 font-semibold text-white">
             Dashboard
           </div>
+
+          {/* Mobile profile link */}
           <a href="#">
             <span className="sr-only">Your profile</span>
             <img
@@ -218,8 +248,12 @@ export default function DashboardLayout({ children }) {
           </a>
         </div>
 
-        <main className="py-10 lg:pl-72">
-          <div className="px-4 sm:px-6 lg:px-8">{children}</div>
+        {/* Main content area */}
+        <main className="lg:pl-72">
+          {/* Offset for desktop sidebar */}
+          <div>
+            {children} {/* Page content injected here */}
+          </div>
         </main>
       </div>
     </>
