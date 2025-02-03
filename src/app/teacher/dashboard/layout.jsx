@@ -8,7 +8,15 @@ import {
   DialogPanel,
   TransitionChild,
 } from "@headlessui/react";
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  Bars3Icon,
+  XMarkIcon,
+  ChartPieIcon,
+  BookOpenIcon,
+  ChatBubbleLeftIcon,
+  CurrencyDollarIcon,
+  Cog6ToothIcon,
+} from "@heroicons/react/24/outline";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -22,27 +30,27 @@ export default function DashboardLayout({ children }) {
     {
       name: "Dashboard",
       href: "/teacher/dashboard",
-      icon: "/dashboard.png",
+      icon: ChartPieIcon,
     },
     {
       name: "Courses",
       href: "/teacher/dashboard/courses",
-      icon: "/course.png",
+      icon: BookOpenIcon,
     },
     {
       name: "communication",
       href: "/teacher/dashboard/communication",
-      icon: "/chat.png",
+      icon: ChatBubbleLeftIcon,
     },
     {
       name: "Revenue",
       href: "/teacher/dashboard/revenue",
-      icon: "/dollar.png",
+      icon: CurrencyDollarIcon,
     },
     {
       name: "Setting",
       href: "/teacher/dashboard/setting",
-      icon: "/setting.png",
+      icon: Cog6ToothIcon,
     },
   ];
 
@@ -81,12 +89,13 @@ export default function DashboardLayout({ children }) {
               </TransitionChild>
               {/* Sidebar component, swap this element with another sidebar if you like */}
               <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-2 ring-1 ring-white/10">
-                <div className="flex h-16 shrink-0 items-center">
+                <div className="flex h-16 shrink-0 items-center gap-2">
                   <img
                     alt="Your Company"
                     src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=500"
-                    className="h-8 w-auto"
+                    className="h-10 w-auto"
                   />
+                  <h1 className="text-white">Devnito</h1>
                 </div>
                 <nav className="flex flex-1 flex-col">
                   <ul role="list" className="flex flex-1 flex-col gap-y-7">
@@ -103,15 +112,14 @@ export default function DashboardLayout({ children }) {
                                 "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
                               )}
                             >
-                              <img
-                                src={item.icon}
-                                alt={item.name}
+                              <item.icon
                                 className={classNames(
                                   pathname === item.href
-                                    ? "bg-gray-800 text-primary"
-                                    : "text-gray-400 hover:bg-gray-800 hover:text-white",
+                                    ? "text-primary"
+                                    : "text-gray-400 group-hover:text-white",
                                   "size-6 shrink-0"
                                 )}
+                                aria-hidden="true"
                               />
                               {item.name}
                             </Link>
@@ -130,12 +138,13 @@ export default function DashboardLayout({ children }) {
         <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
           {/* Sidebar component, swap this element with another sidebar if you like */}
           <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6">
-            <div className="flex h-16 shrink-0 items-center">
+            <div className="flex h-16 shrink-0 items-center gap-2">
               <img
                 alt="Your Company"
                 src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=500"
-                className="h-8 w-auto"
+                className="h-10 w-auto"
               />
+              <h1 className="text-white">Devnito</h1>
             </div>
             <nav className="flex flex-1 flex-col">
               <ul role="list" className="flex flex-1 flex-col gap-y-7">
@@ -152,10 +161,14 @@ export default function DashboardLayout({ children }) {
                             "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
                           )}
                         >
-                          <img
-                            src={item.icon}
-                            alt={item.name}
-                            className="size-6 shrink-0"
+                          <item.icon
+                            className={classNames(
+                              pathname === item.href
+                                ? "text-primary"
+                                : "text-gray-400 group-hover:text-white",
+                              "size-6 shrink-0"
+                            )}
+                            aria-hidden="true"
                           />
                           {item.name}
                         </Link>
