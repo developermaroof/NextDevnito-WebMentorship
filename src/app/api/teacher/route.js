@@ -10,3 +10,11 @@ export async function GET() {
 
   return NextResponse.json({ result: data, success: true });
 }
+
+export async function POST(req) {
+  let payload = await req.json();
+  await mongoose.connect(connectionString);
+  const teacher = new teacherSchema(payload);
+  const result = await teacher.save();
+  return NextResponse.json({ result, success: true });
+}

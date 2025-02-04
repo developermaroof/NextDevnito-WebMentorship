@@ -2,7 +2,7 @@
 "use client";
 
 // Import React hooks
-import { useState } from "react";
+import { useEffect, useState } from "react";
 // Next.js navigation imports
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -23,6 +23,7 @@ import {
   CurrencyDollarIcon, // Revenue icon
   Cog6ToothIcon, // Settings icon
 } from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
 
 // Utility function to combine class names conditionally
 function classNames(...classes) {
@@ -31,10 +32,28 @@ function classNames(...classes) {
 
 // Main layout component for dashboard
 export default function DashboardLayout({ children }) {
-  // State management for mobile sidebar
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [details, setDetails] = useState();
+
+  const router = useRouter();
   // Get current path for active link styling
   const pathname = usePathname();
+
+  useEffect(() => {
+    let data = localStorage.getItem("teacher");
+    if (!data && pathname == "/teacher/dashboard") {
+      router.push("/teacher");
+    } else if (data && pathname == "/teacher") {
+      router.push("/teacher/dashboard");
+    } else {
+      setDetails(JSON.parse(data));
+    }
+  }, []);
+
+  const handleLogOut = () => {
+    localStorage.removeItem("teacher");
+    router.push("/teacher");
+  };
 
   // Navigation configuration array
   const navigation = [
@@ -202,18 +221,28 @@ export default function DashboardLayout({ children }) {
 
                 {/* Profile section */}
                 <li className="-mx-6 mt-auto">
-                  <a
-                    href="#"
-                    className="flex items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-white hover:bg-gray-800"
-                  >
-                    <img
-                      alt=""
-                      src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                      className="size-8 rounded-full bg-gray-800"
-                    />
-                    <span className="sr-only">Your profile</span>
-                    <span aria-hidden="true">Tom Cook</span>
-                  </a>
+                  <div className="flex">
+                    <a
+                      href="#"
+                      className="flex items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-white hover:bg-gray-800"
+                    >
+                      <img
+                        alt=""
+                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                        className="size-8 rounded-full bg-gray-800"
+                      />
+                      <span className="sr-only">Your profile</span>
+                      <span aria-hidden="true">Tom Cook</span>
+                    </a>
+                    {details && details.name ? (
+                      <button
+                        onClick={handleLogOut}
+                        className="border-2 border-blue-500 text-white px-4"
+                      >
+                        LogOut
+                      </button>
+                    ) : null}
+                  </div>
                 </li>
               </ul>
             </nav>
@@ -238,14 +267,25 @@ export default function DashboardLayout({ children }) {
           </div>
 
           {/* Mobile profile link */}
-          <a href="#">
-            <span className="sr-only">Your profile</span>
-            <img
-              alt=""
-              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-              className="size-8 rounded-full bg-gray-800"
-            />
-          </a>
+          <div className="flex gap-x-4">
+            {details && details.name ? (
+              <button
+                onClick={handleLogOut}
+                className="border-2 border-blue-500 text-white px-4"
+              >
+                LogOut
+              </button>
+            ) : null}
+
+            <a href="#" className="border-2 border-blue-500">
+              <span className="sr-only">Your profile</span>
+              <img
+                alt=""
+                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                className="size-8 rounded-full bg-gray-800"
+              />
+            </a>
+          </div>
         </div>
 
         {/* Main content area */}
