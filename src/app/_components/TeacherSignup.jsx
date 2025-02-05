@@ -12,7 +12,31 @@ const TeacherSignup = () => {
 
   const router = useRouter();
 
+  const [error, setError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+
   const handleSignUp = async () => {
+    if (password !== confirmPassword) {
+      setPasswordError(true);
+      return;
+    } else {
+      setPasswordError(false);
+    }
+    if (
+      !name ||
+      !email ||
+      !password ||
+      !confirmPassword ||
+      !city ||
+      !address ||
+      !contact
+    ) {
+      setError(true);
+      return;
+    } else {
+      setError(false);
+    }
+
     console.log(name, email, password, confirmPassword, city, address, contact);
     let response = await fetch("http://localhost:3000/api/teacher", {
       method: "POST",
@@ -48,6 +72,11 @@ const TeacherSignup = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
+          {error && !name && (
+            <span className="text-red-500 text-xs absolute p-[8px]">
+              Field is Required
+            </span>
+          )}
         </div>
         <div>
           <input
@@ -57,6 +86,11 @@ const TeacherSignup = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
+          {error && !email && (
+            <span className="text-red-500 text-xs absolute p-[8px]">
+              Field is Required
+            </span>
+          )}
         </div>
         <div>
           <input
@@ -66,7 +100,18 @@ const TeacherSignup = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          {passwordError && (
+            <span className="text-red-500 text-xs absolute p-[8px]">
+              Password and Confirm Password should be same
+            </span>
+          )}
+          {error && !password && (
+            <span className="text-red-500 text-xs absolute p-[8px]">
+              Field is Required
+            </span>
+          )}
         </div>
+
         <div>
           <input
             className="border-2 border-blue-500 rounded-lg px-4 py-2"
@@ -75,7 +120,18 @@ const TeacherSignup = () => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
+          {passwordError && (
+            <span className="text-red-500 text-xs absolute p-[8px]">
+              Password and Confirm Password should be same
+            </span>
+          )}
+          {error && !confirmPassword && (
+            <span className="text-red-500 text-xs absolute p-[8px]">
+              Field is Required
+            </span>
+          )}
         </div>
+
         <div>
           <input
             className="border-2 border-blue-500 rounded-lg px-4 py-2"
@@ -84,6 +140,11 @@ const TeacherSignup = () => {
             value={city}
             onChange={(e) => setCity(e.target.value)}
           />
+          {error && !city && (
+            <span className="text-red-500 text-xs absolute p-[8px]">
+              Field is Required
+            </span>
+          )}
         </div>
         <div>
           <input
@@ -93,6 +154,11 @@ const TeacherSignup = () => {
             value={address}
             onChange={(e) => setAddress(e.target.value)}
           />
+          {error && !address && (
+            <span className="text-red-500 text-xs absolute p-[8px]">
+              Field is Required
+            </span>
+          )}
         </div>
         <div>
           <input
@@ -102,6 +168,11 @@ const TeacherSignup = () => {
             value={contact}
             onChange={(e) => setContact(e.target.value)}
           />
+          {error && !contact && (
+            <span className="text-red-500 text-xs absolute p-[8px]">
+              Field is Required
+            </span>
+          )}
         </div>
         <div>
           <button

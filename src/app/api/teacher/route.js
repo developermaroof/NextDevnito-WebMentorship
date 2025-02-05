@@ -13,8 +13,26 @@ export async function GET() {
 
 export async function POST(req) {
   let payload = await req.json();
+  let result;
+  let success = false;
   await mongoose.connect(connectionString);
-  const teacher = new teacherSchema(payload);
-  const result = await teacher.save();
-  return NextResponse.json({ result, success: true });
+  if (payload.login) {
+    // for Login
+    result = await teacherSchema.findOne({
+      email: payload.email,
+      password: payload.password,
+    });
+    if (result) {
+      success = true;
+    }
+  } else {
+    // for signup
+    const teacher = new teacherSchema(payload);
+    result = await teacher.save();
+    if (result) {
+      success = true;
+    }
+  }
+
+  return NextResponse.json({ result, success });
 }
