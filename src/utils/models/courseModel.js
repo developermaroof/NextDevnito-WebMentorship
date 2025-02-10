@@ -7,7 +7,7 @@ const courseModel = new mongoose.Schema({
   contentType: String,
   uploadTitle: String,
   uploadDescription: String,
-  // file: String,
+  file: String,
   ppt: String,
   seoDescription: String,
   teacher_id: mongoose.Schema.Types.ObjectId,

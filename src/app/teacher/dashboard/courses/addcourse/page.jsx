@@ -13,7 +13,7 @@ const Courses = () => {
     contentType: "",
     uploadTitle: "",
     uploadDescription: "",
-    file: "",
+    file: {},
   });
   const [formSeo, setFormSeo] = useState({
     ppt: "",
@@ -39,47 +39,35 @@ const Courses = () => {
     } else {
       setError(false);
     }
-    // Combine all form data
-    const formData = {
-      ...formDetails,
-      ...formResources,
-      ...formSeo,
-    };
-
-    const {
-      title,
-      subtitle,
-      description,
-      contentType,
-      uploadTitle,
-      uploadDescription,
-      // file,
-      ppt,
-      seoDescription,
-    } = formData;
-
-    console.log(formData);
-
     let teacher_id;
     const teacherData = JSON.parse(localStorage.getItem("teacher"));
     if (teacherData) {
       teacher_id = teacherData._id;
     }
+    // Create a FormData instance
+    const formData = new FormData();
+    formData.append("title", formDetails.title);
+    formData.append("subtitle", formDetails.subtitle);
+    formData.append("description", formDetails.description);
+    formData.append("contentType", formResources.contentType);
+    formData.append("uploadTitle", formResources.uploadTitle);
+    formData.append("uploadDescription", formResources.uploadDescription);
+    formData.append("ppt", formSeo.ppt);
+    formData.append("seoDescription", formSeo.seoDescription);
+    formData.append("teacher_id", teacher_id);
+
+    // Append the file if it exists
+    if (formResources.file) {
+      formData.append("file", formResources.file);
+    }
+
+    // Note: Do not set the Content-Type header manually;
+    // the browser will set it including the proper boundary.
     let response = await fetch("http://localhost:3000/api/teacher/courses", {
       method: "POST",
-      body: JSON.stringify({
-        title,
-        subtitle,
-        description,
-        contentType,
-        uploadTitle,
-        uploadDescription,
-        // file,
-        ppt,
-        seoDescription,
-        teacher_id,
-      }),
+      body: formData,
     });
+
     response = await response.json();
     if (response.success) {
       console.log(response);
@@ -309,14 +297,18 @@ const Courses = () => {
                     <input
                       type="file"
                       id="file"
+                      name="file"
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const selectedFile = e.target.files[0];
                         setFormResources({
                           ...formResources,
-                          file: e.target.files[0],
-                        })
-                      }
+                          file: selectedFile,
+                          contentType: selectedFile.type, // auto-set the MIME type
+                        });
+                      }}
                     />
+
                     <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg hover:border-blue-500 transition-colors">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"

@@ -58,10 +58,32 @@ const Courses = () => {
       </div>
       <div className="flex flex-wrap gap-4">
         {courses &&
-          courses.map((item, key) => (
-            <div key={key} className="border-[1px]">
-              <h2>{item.title}</h2>
+          courses.map((item, index) => (
+            <div key={index} className="border p-4 max-w-[300px]">
+              <h2 className="font-bold">{item.title}</h2>
               <p>{item.description}</p>
+              {/* Show file if exists */}
+              {item.file && (
+                <div className="mt-2">
+                  {/* If you saved images and stored the file name, assume files are in /uploads */}
+                  {item.contentType && item.contentType.startsWith("image/") ? (
+                    <img
+                      src={`/uploads/${item.file}`}
+                      alt={item.uploadTitle || "Course File"}
+                      className="w-full h-auto object-cover rounded"
+                    />
+                  ) : (
+                    <a
+                      href={`/uploads/${item.file}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 underline"
+                    >
+                      View File
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           ))}
       </div>
