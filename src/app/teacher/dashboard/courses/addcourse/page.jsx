@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 const Courses = () => {
@@ -19,7 +20,25 @@ const Courses = () => {
     seoDescription: "",
   });
 
+  const [error, setError] = useState(false);
+  const router = useRouter();
+
   const handleSubmit = async () => {
+    if (
+      !formDetails.title ||
+      !formDetails.subtitle ||
+      !formDetails.description ||
+      !formResources.contentType ||
+      !formResources.uploadTitle ||
+      !formResources.uploadDescription ||
+      !formSeo.ppt ||
+      !formSeo.seoDescription
+    ) {
+      setError(true);
+      return;
+    } else {
+      setError(false);
+    }
     // Combine all form data
     const formData = {
       ...formDetails,
@@ -34,6 +53,7 @@ const Courses = () => {
       contentType,
       uploadTitle,
       uploadDescription,
+      // file,
       ppt,
       seoDescription,
     } = formData;
@@ -54,6 +74,7 @@ const Courses = () => {
         contentType,
         uploadTitle,
         uploadDescription,
+        // file,
         ppt,
         seoDescription,
         teacher_id,
@@ -62,22 +83,26 @@ const Courses = () => {
     response = await response.json();
     if (response.success) {
       console.log(response);
+      alert("Course Created Successfully!");
+      router.push("/teacher/dashboard/courses");
+    } else {
+      alert("Failed to create course!");
     }
   };
 
   return (
-    <div className="border-[1px] border-red-500">
-      <div className="flex justify-between items-center p-4 border-[1px] border-blue-500">
-        <h1 className="text-2xl font-bold">Courses</h1>
-        <div className="flex items-center gap-4">
-          <button className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+    <div>
+      <div className="flex justify-between items-center p-2 py-4">
+        <h1 className="text-xl font-bold">Courses</h1>
+        <div className="flex items-center gap-[4px]">
+          <button className="text-xs px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
             Delete
           </button>
-          <button className="px-4 py-2 bg-white text-black border-[1px] rounded-lg  hover:bg-gray-500 hover:text-white">
-            Move to Draft
+          <button className="text-xs px-3 py-2 border-[1px] text-black rounded-lg hover:text-white hover:bg-gray-600">
+            Draft
           </button>
           <button
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            className="text-xs px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
             onClick={handleSubmit}
           >
             Submit
@@ -85,13 +110,13 @@ const Courses = () => {
         </div>
       </div>
 
-      <div className="p-4">
-        <div className="flex gap-4 mb-6">
+      <div className="p-2 py-4">
+        <div className="flex gap-2 mb-6 border-b-[1px] border-gray-300">
           <button
             className={`px-4 py-2 rounded-lg ${
               activeTab === "details"
-                ? "bg-blue-500 text-white"
-                : "bg-gray-200 hover:bg-gray-300"
+                ? "border-b-2 border-blue-500 text-blue-500 font-semibold text-sm"
+                : "text-gray-500 hover:text-gray-600 font-semibold text-sm"
             }`}
             onClick={() => setActiveTab("details")}
           >
@@ -100,8 +125,8 @@ const Courses = () => {
           <button
             className={`px-4 py-2 rounded-lg ${
               activeTab === "resources"
-                ? "bg-blue-500 text-white"
-                : "bg-gray-200 hover:bg-gray-300"
+                ? "border-b-2 border-blue-500 text-blue-500 font-semibold text-sm"
+                : "text-gray-500 hover:text-gray-600 font-semibold text-sm"
             }`}
             onClick={() => setActiveTab("resources")}
           >
@@ -110,8 +135,8 @@ const Courses = () => {
           <button
             className={`px-4 py-2 rounded-lg ${
               activeTab === "seo"
-                ? "bg-blue-500 text-white"
-                : "bg-gray-200 hover:bg-gray-300"
+                ? "border-b-2 border-blue-500 text-blue-500 font-semibold text-sm"
+                : "text-gray-500 hover:text-gray-600 font-semibold text-sm"
             }`}
             onClick={() => setActiveTab("seo")}
           >
@@ -123,31 +148,39 @@ const Courses = () => {
           {/* Details Tab Content */}
           {activeTab === "details" && (
             <>
-              <div className="border-[1px] border-red-300">
-                <h2>Course Details</h2>
-                <p>Enter the details for the course.</p>
+              <div className="flex flex-col">
+                <h2 className="text-md font-semibold">Course Details</h2>
+                <p className="text-sm text-gray-500">
+                  Enter the details for the course.
+                </p>
               </div>
 
-              <div className="space-y-4 border-[1px] border-red-300">
-                <div>
-                  <label htmlFor="title">Title</label>
+              <div className="space-y-4 p-2">
+                <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
+                  <label className="text-sm text-gray-600" htmlFor="title">
+                    Title
+                  </label>
                   <input
                     type="text"
-                    placeholder="Course Title"
-                    className="w-full p-2 border rounded-lg"
+                    placeholder="Enter Course Title"
+                    className="w-full text-sm rounded-lg focus:outline-none"
                     value={formDetails.title}
                     onChange={(e) =>
                       setFormDetails({ ...formDetails, title: e.target.value })
                     }
                   />
                 </div>
-
-                <div>
-                  <label htmlFor="subtitle">Subtitle </label>
+                {error && !formDetails.title && (
+                  <span className="text-red-500">Required</span>
+                )}
+                <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
+                  <label className="text-sm text-gray-600" htmlFor="subtitle">
+                    Subtitle{" "}
+                  </label>
                   <input
                     type="text"
-                    placeholder="Course Subtitle"
-                    className="w-full p-2 border rounded-lg"
+                    placeholder="Enter Course Subtitle"
+                    className="w-full text-sm rounded-lg focus:outline-none"
                     value={formDetails.subtitle}
                     onChange={(e) =>
                       setFormDetails({
@@ -157,11 +190,19 @@ const Courses = () => {
                     }
                   />
                 </div>
-                <div>
-                  <label htmlFor="description">Description</label>
+                {error && !formDetails.subtitle && (
+                  <span className="text-red-500">Required</span>
+                )}
+                <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
+                  <label
+                    className="text-sm text-gray-600"
+                    htmlFor="description"
+                  >
+                    Description
+                  </label>
                   <textarea
-                    placeholder="Course Description"
-                    className="w-full p-2 border rounded-lg"
+                    placeholder="Enter Course Description"
+                    className="w-full text-sm rounded-lg focus:outline-none"
                     value={formDetails.description}
                     onChange={(e) =>
                       setFormDetails({
@@ -171,6 +212,9 @@ const Courses = () => {
                     }
                   />
                 </div>
+                {error && !formDetails.description && (
+                  <span className="text-red-500">Required</span>
+                )}
               </div>
             </>
           )}
@@ -178,18 +222,25 @@ const Courses = () => {
           {/* Resources Tab Content */}
           {activeTab === "resources" && (
             <>
-              <div className="border-[1px] border-red-300">
-                <h2>Upload Notes</h2>
-                <p>Enter the details for the course.</p>
+              <div className="flex flex-col">
+                <h2 className="text-md font-semibold">Upload Notes</h2>
+                <p className="text-sm text-gray-500">
+                  Enter the details for the course.
+                </p>
               </div>
 
-              <div className="space-y-4 border-[1px] border-red-300">
-                <div>
-                  <label htmlFor="contentType">Content Type</label>
+              <div className="space-y-4 p-2">
+                <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
+                  <label
+                    className="text-sm text-gray-600"
+                    htmlFor="contentType"
+                  >
+                    Content Type
+                  </label>
                   <input
                     type="text"
-                    placeholder="Course ContentType"
-                    className="w-full p-2 border rounded-lg"
+                    placeholder="Enter Content Type"
+                    className="w-full text-sm rounded-lg focus:outline-none"
                     value={formResources.contentType}
                     onChange={(e) =>
                       setFormResources({
@@ -199,13 +250,20 @@ const Courses = () => {
                     }
                   />
                 </div>
-
-                <div>
-                  <label htmlFor="uploadTitle">Title</label>
+                {error && !formResources.contentType && (
+                  <span className="text-red-500">Required</span>
+                )}
+                <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
+                  <label
+                    className="text-sm text-gray-600"
+                    htmlFor="uploadTitle"
+                  >
+                    Title
+                  </label>
                   <input
                     type="text"
-                    placeholder="Course UploadTitle"
-                    className="w-full p-2 border rounded-lg"
+                    placeholder="Enter Content Title"
+                    className="w-full text-sm rounded-lg focus:outline-none"
                     value={formResources.uploadTitle}
                     onChange={(e) =>
                       setFormResources({
@@ -215,11 +273,19 @@ const Courses = () => {
                     }
                   />
                 </div>
-                <div>
-                  <label htmlFor="uploadDescription">Description</label>
+                {error && !formResources.uploadTitle && (
+                  <span className="text-red-500">Required</span>
+                )}
+                <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
+                  <label
+                    className="text-sm text-gray-600"
+                    htmlFor="uploadDescription"
+                  >
+                    Description
+                  </label>
                   <textarea
-                    placeholder="Course UploadDescription"
-                    className="w-full p-2 border rounded-lg"
+                    placeholder="Enter Content Description"
+                    className="w-full text-sm rounded-lg focus:outline-none"
                     value={formResources.uploadDescription}
                     onChange={(e) =>
                       setFormResources({
@@ -229,8 +295,14 @@ const Courses = () => {
                     }
                   />
                 </div>
-                <div>
-                  <label htmlFor="file" className="block mb-2">
+                {error && !formResources.uploadDescription && (
+                  <span className="text-red-500">Required</span>
+                )}
+                <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
+                  <label
+                    className="text-sm text-gray-600 block mb-2"
+                    htmlFor="file"
+                  >
                     Upload File
                   </label>
                   <div className="relative">
@@ -284,18 +356,22 @@ const Courses = () => {
           {/* SEO Tab Content */}
           {activeTab === "seo" && (
             <>
-              <div className="border-[1px] border-red-300">
-                <h2>SEO</h2>
-                <p>Enter the details for the course.</p>
+              <div className="flex flex-col">
+                <h2 className="text-md font-semibold">SEO</h2>
+                <p className="text-sm text-gray-500">
+                  Enter the details for the course.
+                </p>
               </div>
 
-              <div className="space-y-4 border-[1px] border-red-300">
-                <div>
-                  <label htmlFor="ppt">PPT Title</label>
+              <div className="space-y-4 p-2">
+                <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
+                  <label className="text-sm text-gray-600" htmlFor="ppt">
+                    PPT Title
+                  </label>
                   <input
                     type="text"
-                    placeholder="Course ppt"
-                    className="w-full p-2 border rounded-lg"
+                    placeholder="Enter PPT Title"
+                    className="w-full text-sm rounded-lg focus:outline-none"
                     value={formSeo.ppt}
                     onChange={(e) =>
                       setFormSeo({
@@ -305,13 +381,21 @@ const Courses = () => {
                     }
                   />
                 </div>
+                {error && !formSeo.ppt && (
+                  <span className="text-red-500">Required</span>
+                )}
 
-                <div>
-                  <label htmlFor="seoDescription">Description</label>
+                <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
+                  <label
+                    className="text-sm text-gray-600"
+                    htmlFor="seoDescription"
+                  >
+                    Description
+                  </label>
                   <input
                     type="text"
-                    placeholder="Course seoDescription"
-                    className="w-full p-2 border rounded-lg"
+                    placeholder="Enter PPT Description"
+                    className="w-full text-sm rounded-lg focus:outline-none"
                     value={formSeo.seoDescription}
                     onChange={(e) =>
                       setFormSeo({
@@ -321,6 +405,9 @@ const Courses = () => {
                     }
                   />
                 </div>
+                {error && !formSeo.seoDescription && (
+                  <span className="text-red-500">Required</span>
+                )}
               </div>
             </>
           )}

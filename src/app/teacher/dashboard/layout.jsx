@@ -128,7 +128,7 @@ export default function DashboardLayout({ children }) {
                 <div className="flex h-16 shrink-0 items-center gap-2">
                   <img
                     alt="Your Company"
-                    src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=500"
+                    src="/logo.svg"
                     className="h-10 w-auto"
                   />
                   <h1 className="text-white">Devnito</h1>
@@ -179,11 +179,7 @@ export default function DashboardLayout({ children }) {
           <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6">
             {/* Logo section */}
             <div className="flex h-16 shrink-0 items-center gap-2">
-              <img
-                alt="Your Company"
-                src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=500"
-                className="h-10 w-auto"
-              />
+              <img alt="Your Company" src="/logo.svg" className="h-10 w-auto" />
               <h1 className="text-white">Devnito</h1>
             </div>
 
@@ -220,11 +216,11 @@ export default function DashboardLayout({ children }) {
                 </li>
 
                 {/* Profile section */}
-                <li className="-mx-6 mt-auto">
+                <li className="mx-auto mt-auto mb-4">
                   <div className="flex">
                     <a
                       href="#"
-                      className="flex items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-white hover:bg-gray-800"
+                      className="flex items-center gap-x-4 px-6 py-1 text-sm/6 font-semibold text-white hover:bg-gray-800"
                     >
                       <img
                         alt=""
@@ -237,7 +233,7 @@ export default function DashboardLayout({ children }) {
                     {details && details.name ? (
                       <button
                         onClick={handleLogOut}
-                        className="border-2 border-blue-500 text-white px-4"
+                        className="bg-blue-500 rounded-lg text-white px-4 text-xs hover:bg-blue-600"
                       >
                         LogOut
                       </button>
@@ -271,13 +267,13 @@ export default function DashboardLayout({ children }) {
             {details && details.name ? (
               <button
                 onClick={handleLogOut}
-                className="border-2 border-blue-500 text-white px-4"
+                className="bg-blue-500 rounded-lg text-white px-4 text-xs hover:bg-blue-600"
               >
                 LogOut
               </button>
             ) : null}
 
-            <a href="#" className="border-2 border-blue-500">
+            <a href="#">
               <span className="sr-only">Your profile</span>
               <img
                 alt=""

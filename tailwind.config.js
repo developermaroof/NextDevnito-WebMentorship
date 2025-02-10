@@ -4,6 +4,7 @@ module.exports = {
     extend: {
       colors: {
         primary: "#2563EB", // Keep your custom color
+        dashboardpagecolor: "#E5E5E5",
       },
     },
   },

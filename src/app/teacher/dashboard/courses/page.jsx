@@ -1,20 +1,41 @@
+"use client";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import React from "react";
 
 const Courses = () => {
+  const [courses, setCourses] = useState();
+
+  useEffect(() => {
+    loadCourses();
+  }, []);
+
+  const loadCourses = async () => {
+    const teacherData = JSON.parse(localStorage.getItem("teacher"));
+    const teacher_id = teacherData._id;
+    let response = await fetch(
+      `http://localhost:3000/api/teacher/courses/${teacher_id}`
+    );
+    response = await response.json();
+    if (response.success) {
+      setCourses(response.result);
+    } else {
+      alert("Failed to load courses!");
+    }
+  };
+
   return (
-    <div className="border-[1px]">
+    <div>
       <div className="flex justify-between items-center p-4">
-        <h1 className="text-2xl font-bold">Courses</h1>
-        <div className="flex items-center gap-4">
-          <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+        <h1 className="text-xl font-bold">Courses</h1>
+        <div className="flex items-center gap-2">
+          <button className="text-xs px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
             <Link href="/teacher/dashboard/courses/addcourse">Add Course</Link>
           </button>
           {/* Horizontal 3-dot menu icon */}
           <button className="p-2 hover:bg-gray-100 rounded-full">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
+              className="h-5 w-5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -34,6 +55,15 @@ const Courses = () => {
             </svg>
           </button>
         </div>
+      </div>
+      <div className="flex flex-wrap gap-4">
+        {courses &&
+          courses.map((item, key) => (
+            <div key={key} className="border-[1px]">
+              <h2>{item.title}</h2>
+              <p>{item.description}</p>
+            </div>
+          ))}
       </div>
     </div>
   );
