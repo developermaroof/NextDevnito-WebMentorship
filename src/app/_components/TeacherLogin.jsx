@@ -1,5 +1,6 @@
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 
 const TeacherLogin = () => {
   const [email, setEmail] = useState("");
@@ -30,10 +31,10 @@ const TeacherLogin = () => {
       const { result } = response;
       delete result.password;
       localStorage.setItem("teacher", JSON.stringify(result));
-      alert("Teacher Logged In Successfully!");
+      toast.success("Teacher Logged In Successfully!");
       router.push("/teacher/dashboard");
     } else {
-      alert("Invalid Email or Password!");
+      toast.error("Invalid Email or Password!");
     }
   };
 

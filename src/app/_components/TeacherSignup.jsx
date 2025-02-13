@@ -1,5 +1,6 @@
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 
 const TeacherSignup = () => {
   const [name, setName] = useState("");
@@ -52,7 +53,7 @@ const TeacherSignup = () => {
     response = await response.json();
     console.log(response);
     if (response.success) {
-      alert("Teacher SignedUp Successfully!");
+      toast.success("Teacher SignedUp Successfully!");
       const { result } = response;
       delete result.password;
       localStorage.setItem("teacher", JSON.stringify(result));

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 
 const Courses = () => {
   // Declare a state variable "activeTab" to manage which tab is active, defaulting to "details"
@@ -85,10 +86,10 @@ const Courses = () => {
     // If the response indicates success
     if (response.success) {
       console.log(response);
-      alert("Course Created Successfully!");
+      toast.success("Course Created Successfully!");
       router.push("/teacher/dashboard/courses");
     } else {
-      alert("Failed to create course!");
+      toast.error("Failed to create course!");
     }
   };
 
@@ -99,20 +100,13 @@ const Courses = () => {
         <h1 className="text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl font-bold">
           Courses
         </h1>
-        <div className="flex items-center gap-[4px] lg:gap-4">
-          <button className="text-xs lg:text-sm xl:text-base 2xl:text-lg px-3 lg:px-4 xl:px-6 2xl:px-8 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
-            Delete
-          </button>
-          <button className="text-xs lg:text-sm xl:text-base 2xl:text-lg px-3 lg:px-4 xl:px-6 2xl:px-8 py-2 border-[1px] text-black rounded-lg hover:text-white hover:bg-gray-600">
-            Draft
-          </button>
-          <button
-            className="text-xs lg:text-sm xl:text-base 2xl:text-lg px-3 lg:px-4 xl:px-6 2xl:px-8 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-            onClick={handleSubmit}
-          >
-            Submit
-          </button>
-        </div>
+
+        <button
+          className="text-xs lg:text-sm xl:text-base 2xl:text-lg px-4 lg:px-6 xl:px-8 py-2 lg:py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          onClick={handleSubmit}
+        >
+          Submit
+        </button>
       </div>
 
       {/* Main content container with padding */}

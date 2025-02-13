@@ -1,11 +1,7 @@
-// Enable client-side rendering for this component
 "use client";
-
-// Import React hooks
 import { useEffect, useState } from "react";
-// Next.js navigation imports
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 // Headless UI components for dialog/modal functionality
 import {
   Dialog,
@@ -15,22 +11,20 @@ import {
 } from "@headlessui/react";
 // Heroicons for UI elements
 import {
-  Bars3Icon, // Mobile menu icon
-  XMarkIcon, // Close icon
-  ChartPieIcon, // Dashboard icon
-  BookOpenIcon, // Courses icon
-  ChatBubbleLeftIcon, // Communication icon
-  CurrencyDollarIcon, // Revenue icon
-  Cog6ToothIcon, // Settings icon
+  Bars3Icon,
+  XMarkIcon,
+  ChartPieIcon,
+  BookOpenIcon,
+  ChatBubbleLeftIcon,
+  CurrencyDollarIcon,
+  Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
-import { useRouter } from "next/navigation";
 
 // Utility function to combine class names conditionally
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-// Main layout component for dashboard
 export default function DashboardLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [details, setDetails] = useState();
@@ -217,8 +211,7 @@ export default function DashboardLayout({ children }) {
 
                 {/* Profile section */}
                 <li className="mx-auto mt-auto mb-4">
-                  <div className="flex">
-                    <a
+                  {/* <a
                       href="#"
                       className="flex items-center gap-x-4 px-6 py-1 text-sm/6 font-semibold text-white hover:bg-gray-800"
                     >
@@ -229,16 +222,20 @@ export default function DashboardLayout({ children }) {
                       />
                       <span className="sr-only">Your profile</span>
                       <span aria-hidden="true">Tom Cook</span>
-                    </a>
-                    {details && details.name ? (
+                    </a> */}
+                  {details && details.name ? (
+                    <div className="flex gap-4 justify-center items-center">
+                      <span className="text-blue-400 text-sm">
+                        {details.name}
+                      </span>
                       <button
                         onClick={handleLogOut}
-                        className="bg-blue-500 rounded-lg text-white px-4 text-xs hover:bg-blue-600"
+                        className="bg-blue-500 rounded-lg text-white px-4 py-[8px] text-xs hover:bg-blue-600"
                       >
                         LogOut
                       </button>
-                    ) : null}
-                  </div>
+                    </div>
+                  ) : null}
                 </li>
               </ul>
             </nav>
@@ -246,7 +243,7 @@ export default function DashboardLayout({ children }) {
         </div>
 
         {/* Mobile header */}
-        <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-gray-900 px-4 py-4 shadow-xs sm:px-6 lg:hidden">
+        <div className="sticky top-0 z-40 flex items-center gap-x-2 bg-gray-900 px-4 py-4 shadow-xs sm:px-6 lg:hidden">
           {/* Mobile menu button */}
           <button
             type="button"
@@ -265,22 +262,27 @@ export default function DashboardLayout({ children }) {
           {/* Mobile profile link */}
           <div className="flex gap-x-4">
             {details && details.name ? (
-              <button
-                onClick={handleLogOut}
-                className="bg-blue-500 rounded-lg text-white px-4 text-xs hover:bg-blue-600"
-              >
-                LogOut
-              </button>
+              <div className="flex gap-2 justify-center items-center">
+                <span className="text-blue-400 text-xs sm:text-sm">
+                  {details.name}
+                </span>
+                <button
+                  onClick={handleLogOut}
+                  className="bg-blue-500 rounded-lg text-white px-2 sm:px-4 py-[6px] text-xs hover:bg-blue-600"
+                >
+                  LogOut
+                </button>
+              </div>
             ) : null}
 
-            <a href="#">
+            {/* <a href="#">
               <span className="sr-only">Your profile</span>
               <img
                 alt=""
                 src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
                 className="size-8 rounded-full bg-gray-800"
               />
-            </a>
+            </a> */}
           </div>
         </div>
 
