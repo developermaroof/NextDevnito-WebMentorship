@@ -4,7 +4,9 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 
-const AddCourse = () => {
+const EditCourse = (props) => {
+  console.log(props.params.id);
+
   // Declare a state variable "activeTab" to manage which tab is active, defaulting to "details"
   const [activeTab, setActiveTab] = useState("details");
   const [formDetails, setFormDetails] = useState({
@@ -25,7 +27,7 @@ const AddCourse = () => {
   const [error, setError] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async () => {
+  const handleEdit = async () => {
     // Check if any required fields in formDetails, formResources, or formSeo are empty
     if (
       !formDetails.title ||
@@ -44,53 +46,6 @@ const AddCourse = () => {
       // Otherwise, clear any previous error indication
       setError(false);
     }
-    // Initialize a variable for teacher_id
-    let teacher_id;
-    // Retrieve teacher data stored in localStorage and parse it from JSON
-    const teacherData = JSON.parse(localStorage.getItem("teacher"));
-    // If teacherData exists, extract the teacher's _id property
-    if (teacherData) {
-      teacher_id = teacherData._id;
-    }
-    // Create a new FormData instance to hold form data for a POST request
-    const formData = new FormData();
-    // Append course details to the form data
-    formData.append("title", formDetails.title);
-    formData.append("subtitle", formDetails.subtitle);
-    formData.append("description", formDetails.description);
-    // Append resource details to the form data
-    formData.append("contentType", formResources.contentType);
-    formData.append("uploadTitle", formResources.uploadTitle);
-    formData.append("uploadDescription", formResources.uploadDescription);
-    // Append SEO details to the form data
-    formData.append("ppt", formSeo.ppt);
-    formData.append("seoDescription", formSeo.seoDescription);
-    // Append the teacher ID to the form data
-    formData.append("teacher_id", teacher_id);
-
-    // If a file has been selected, append it to the form data
-    if (formResources.file) {
-      formData.append("file", formResources.file);
-    }
-
-    // Note: The browser automatically sets the Content-Type header for FormData with the proper boundary
-
-    // Send a POST request to the API endpoint with the form data
-    let response = await fetch("http://localhost:3000/api/teacher/courses", {
-      method: "POST",
-      body: formData,
-    });
-
-    // Parse the response JSON
-    response = await response.json();
-    // If the response indicates success
-    if (response.success) {
-      console.log(response);
-      toast.success("Course Created Successfully!");
-      router.push("/teacher/dashboard/courses");
-    } else {
-      toast.error("Failed to create course!");
-    }
   };
 
   return (
@@ -98,14 +53,14 @@ const AddCourse = () => {
       {/* Header section with a flex container for the title and action buttons */}
       <div className="flex justify-between items-center p-2 py-4">
         <h1 className="text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl font-bold">
-          Add Course
+          Edit Course
         </h1>
 
         <button
           className="text-xs lg:text-sm xl:text-base 2xl:text-lg px-4 lg:px-6 xl:px-8 py-2 lg:py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-          onClick={handleSubmit}
+          onClick={handleEdit}
         >
-          Submit
+          Update
         </button>
       </div>
 
@@ -485,4 +440,4 @@ const AddCourse = () => {
   );
 };
 
-export default AddCourse;
+export default EditCourse;

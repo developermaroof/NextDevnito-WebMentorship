@@ -15,3 +15,16 @@ export async function GET(req, content) {
 
   return NextResponse.json({ result, success });
 }
+
+export async function DELETE(req, content) {
+  const id = content.params.id;
+  let result;
+  let success = false;
+  await mongoose.connect(connectionString);
+  result = await courseSchema.deleteOne({ _id: id });
+  if (result.deletedCount > 0) {
+    success = true;
+  }
+
+  return NextResponse.json({ result, success });
+}

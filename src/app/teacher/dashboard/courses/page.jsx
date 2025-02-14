@@ -4,9 +4,12 @@ import Link from "next/link";
 import { toast } from "react-toastify";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import { useRouter } from "next/navigation";
 
 const Courses = () => {
   const [courses, setCourses] = useState();
+  const [openMenuIndex, setOpenMenuIndex] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     loadCourses();
@@ -26,6 +29,26 @@ const Courses = () => {
     }
   };
 
+  const handleDeleteCourse = async (id) => {
+    let response = await fetch(
+      `http://localhost:3000/api/teacher/courses/${id}`,
+      {
+        method: "DELETE",
+      }
+    );
+    response = await response.json();
+    if (response.success) {
+      toast.success("Course Deleted Successfully!");
+      loadCourses();
+    } else {
+      toast.error("Failed to delete course!");
+    }
+  };
+
+  const handleMenuToggle = (index) => {
+    setOpenMenuIndex(openMenuIndex === index ? null : index);
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center p-4">
@@ -37,7 +60,6 @@ const Courses = () => {
             <Link href="/teacher/dashboard/courses/addcourse">Add Course</Link>
           </button>
           <button className="p-2 hover:bg-gray-100 rounded-full">
-            {/* SVG icon */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 lg:h-6 xl:h-7 2xl:h-8 w-5 lg:w-6 xl:w-7 2xl:w-8"
@@ -49,13 +71,13 @@ const Courses = () => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M5 12h.01M12 12h.01M19 12h.01"
+                d="M12 5h.01M12 12h.01M12 19h.01"
               />
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"
+                d="M13 5a1 1 0 11-2 0 1 1 0 012 0zm0 7a1 1 0 11-2 0 1 1 0 012 0zm0 7a1 1 0 11-2 0 1 1 0 012 0z"
               />
             </svg>
           </button>
@@ -65,9 +87,61 @@ const Courses = () => {
       <div className="flex flex-wrap gap-4">
         {courses
           ? courses.map((item, index) => (
-              <div key={index} className="border p-4 max-w-[300px]">
-                <h2 className="font-bold">{item.title}</h2>
-                <p>{item.description}</p>
+              <div key={index} className="relative border p-4 max-w-[300px]">
+                <div className="flex justify-between">
+                  <div>
+                    <h2 className="font-bold">{item.title}</h2>
+                    <p>{item.description}</p>
+                  </div>
+                  <div className="relative">
+                    <button
+                      onClick={() => handleMenuToggle(index)}
+                      className="p-2 hover:bg-gray-100 rounded-full"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 lg:h-6 xl:h-7 2xl:h-8 w-5 lg:w-6 xl:w-7 2xl:w-8"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 5h.01M12 12h.01M12 19h.01"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 5a1 1 0 11-2 0 1 1 0 012 0zm0 7a1 1 0 11-2 0 1 1 0 012 0zm0 7a1 1 0 11-2 0 1 1 0 012 0z"
+                        />
+                      </svg>
+                    </button>
+                    {/* Dropdown menu appears only for the course whose index matches openMenuIndex */}
+                    {openMenuIndex === index && (
+                      <div className="absolute right-0 mt-2 bg-white border rounded shadow z-10">
+                        <button
+                          onClick={() =>
+                            router.push(
+                              `/teacher/dashboard/courses/${item._id}`
+                            )
+                          }
+                          className="w-full text-left px-4 py-2 text-sm text-blue-500 hover:bg-gray-100"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteCourse(item._id)}
+                          className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 {item.file && (
                   <div className="mt-2">
