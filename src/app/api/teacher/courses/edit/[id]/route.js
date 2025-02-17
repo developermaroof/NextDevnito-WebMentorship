@@ -5,9 +5,9 @@ import { courseSchema } from "@/utils/models/courseModel";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
-export async function PUT(req, content) {
+export async function PUT(req, context) {
   try {
-    const id = content.params.id; // Use content.params.id
+    const { id } = await context.params;
     const formData = await req.formData();
 
     const title = formData.get("title");
@@ -65,8 +65,8 @@ export async function PUT(req, content) {
   }
 }
 
-export async function GET(req, content) {
-  const id = content.params.id;
+export async function GET(req, context) {
+  const { id } = await context.params;
   let result;
   let success = false;
   await mongoose.connect(connectionString);

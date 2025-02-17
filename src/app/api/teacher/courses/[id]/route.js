@@ -3,8 +3,8 @@ import { courseSchema } from "@/utils/models/courseModel";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
-export async function GET(req, content) {
-  const id = content.params.id;
+export async function GET(req, context) {
+  const { id } = await context.params;
   let result;
   let success = false;
   await mongoose.connect(connectionString);
@@ -16,8 +16,8 @@ export async function GET(req, content) {
   return NextResponse.json({ result, success });
 }
 
-export async function DELETE(req, content) {
-  const id = content.params.id;
+export async function DELETE(req, context) {
+  const { id } = await context.params;
   let result;
   let success = false;
   await mongoose.connect(connectionString);
