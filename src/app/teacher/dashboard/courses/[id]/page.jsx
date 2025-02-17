@@ -1,13 +1,15 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import { useRouter, useParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-const EditCourse = (props) => {
-  console.log(props.params.id);
+const EditCourse = () => {
+  const params = useParams();
+  const router = useRouter();
 
-  // Declare a state variable "activeTab" to manage which tab is active, defaulting to "details"
+  console.log("Course ID:", params.id);
+
   const [activeTab, setActiveTab] = useState("details");
   const [formDetails, setFormDetails] = useState({
     title: "",
@@ -18,17 +20,44 @@ const EditCourse = (props) => {
     contentType: "",
     uploadTitle: "",
     uploadDescription: "",
-    file: {},
+    file: null,
   });
   const [formSeo, setFormSeo] = useState({
     ppt: "",
     seoDescription: "",
   });
   const [error, setError] = useState(false);
-  const router = useRouter();
+
+  useEffect(() => {
+    loadCourse();
+  }, []);
+
+  const loadCourse = async () => {
+    let response = await fetch(
+      `http://localhost:3000/api/teacher/courses/edit/${params.id}`
+    );
+    response = await response.json();
+    if (response.success) {
+      console.log("response.result: ", response.result);
+      setFormDetails({
+        title: response.result.title,
+        subtitle: response.result.subtitle,
+        description: response.result.description,
+      });
+      setFormResources({
+        contentType: response.result.contentType,
+        uploadTitle: response.result.uploadTitle,
+        uploadDescription: response.result.uploadDescription,
+        file: null,
+      });
+      setFormSeo({
+        ppt: response.result.ppt,
+        seoDescription: response.result.seoDescription,
+      });
+    }
+  };
 
   const handleEdit = async () => {
-    // Check if any required fields in formDetails, formResources, or formSeo are empty
     if (
       !formDetails.title ||
       !formDetails.subtitle ||
@@ -39,15 +68,41 @@ const EditCourse = (props) => {
       !formSeo.ppt ||
       !formSeo.seoDescription
     ) {
-      // If any required field is missing, set the error state to true and exit the function
       setError(true);
       return;
     } else {
-      // Otherwise, clear any previous error indication
       setError(false);
     }
-  };
 
+    const formData = new FormData();
+    formData.append("title", formDetails.title);
+    formData.append("subtitle", formDetails.subtitle);
+    formData.append("description", formDetails.description);
+    formData.append("contentType", formResources.contentType);
+    formData.append("uploadTitle", formResources.uploadTitle);
+    formData.append("uploadDescription", formResources.uploadDescription);
+    formData.append("ppt", formSeo.ppt);
+    formData.append("seoDescription", formSeo.seoDescription);
+
+    if (formResources.file && formResources.file instanceof File) {
+      formData.append("file", formResources.file);
+    }
+
+    let response = await fetch(
+      `http://localhost:3000/api/teacher/courses/edit/${params.id}`,
+      {
+        method: "PUT",
+        body: formData,
+      }
+    );
+    response = await response.json();
+    if (response.success) {
+      toast.success("Course Updated Successfully!");
+      router.push("/teacher/dashboard/courses");
+    } else {
+      toast.error("Failed to update course!");
+    }
+  };
   return (
     <div>
       {/* Header section with a flex container for the title and action buttons */}
