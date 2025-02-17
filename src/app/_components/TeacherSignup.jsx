@@ -39,7 +39,7 @@ const TeacherSignup = () => {
     }
 
     console.log(name, email, password, confirmPassword, city, address, contact);
-    let response = await fetch("http://localhost:3000/api/teacher", {
+    let response = await fetch("/api/teacher", {
       method: "POST",
       body: JSON.stringify({
         name,
