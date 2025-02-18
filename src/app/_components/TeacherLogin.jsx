@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 const TeacherLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(false);
 
   const router = useRouter();
 
@@ -39,39 +39,41 @@ const TeacherLogin = () => {
 
   return (
     <div className="flex flex-col items-center justify-center">
-      <h1 className="text-2xl font-bold">TeacherLogin</h1>
-      <div className=" flex flex-col gap-4 mt-4 items-center">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center text-gray-800 mb-6 md:mb-8 lg:mb-10">
+        TEACHER LOGIN
+      </h1>
+      <div className="space-y-4 md:space-y-5 lg:space-y-6">
         <div>
           <input
-            className="border-2 border-blue-500 rounded-lg px-4 py-2"
+            className="w-full text-sm sm:text-base md:text-lg lg:text-xl lg:w-96 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 transition"
             type="email"
-            placeholder="Email"
+            placeholder="Enter Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
           {error && !email && (
-            <span className="text-red-500 text-xs absolute p-[8px]">
+            <p className="text-red-500 text-xs md:text-sm lg:text-base mt-1">
               Email is Required
-            </span>
+            </p>
           )}
         </div>
         <div>
           <input
-            className="border-2 border-blue-500 rounded-lg px-4 py-2"
+            className="w-full text-sm sm:text-base md:text-lg lg:text-xl lg:w-96 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 transition"
             type="password"
-            placeholder="Password"
+            placeholder="Enter Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
           {error && !password && (
-            <span className="text-red-500 text-xs absolute p-[8px]">
+            <p className="text-red-500 text-xs md:text-sm lg:text-base mt-1">
               Password is Required
-            </span>
+            </p>
           )}
         </div>
         <div>
           <button
-            className="bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600 w-[100px]"
+            className="w-full text-sm sm:text-base md:text-lg lg:text-xl lg:w-96 bg-blue-500 text-white rounded-lg px-4 py-3 hover:bg-blue-600 transition"
             type="submit"
             onClick={handleLogin}
           >

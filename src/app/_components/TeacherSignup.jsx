@@ -3,26 +3,35 @@ import React, { useState } from "react";
 import { toast } from "react-toastify";
 
 const TeacherSignup = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [city, setCity] = useState("");
-  const [address, setAddress] = useState("");
-  const [contact, setContact] = useState("");
-
-  const router = useRouter();
-
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    city: "",
+    address: "",
+    contact: "",
+  });
   const [error, setError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
 
+  const router = useRouter();
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
   const handleSignUp = async () => {
+    const { name, email, password, confirmPassword, city, address, contact } =
+      formData;
+
     if (password !== confirmPassword) {
       setPasswordError(true);
       return;
     } else {
       setPasswordError(false);
     }
+
     if (
       !name ||
       !email ||
@@ -40,14 +49,7 @@ const TeacherSignup = () => {
 
     let response = await fetch("/api/teacher", {
       method: "POST",
-      body: JSON.stringify({
-        name,
-        email,
-        password,
-        city,
-        address,
-        contact,
-      }),
+      body: JSON.stringify({ name, email, password, city, address, contact }),
     });
     response = await response.json();
     if (response.success) {
@@ -60,126 +62,141 @@ const TeacherSignup = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center">
-      <h1 className="text-2xl font-bold">TeacherSignUp</h1>
-      <div className=" flex flex-col gap-4 mt-4 items-center">
+    <div className=" flex flex-col items-center justify-center">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center text-gray-800 mb-6 md:mb-8 lg:mb-10">
+        TEACHER SIGNUP
+      </h1>
+      <div className="space-y-4 md:space-y-6 lg:space-y-8">
+        {/* Name Input */}
         <div>
           <input
-            className="border-2 border-blue-500 rounded-lg px-4 py-2"
+            className="w-full text-sm sm:text-base md:text-lg lg:text-xl lg:w-96 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 transition"
             type="text"
+            name="name"
             placeholder="Enter Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={formData.name}
+            onChange={handleChange}
           />
-          {error && !name && (
-            <span className="text-red-500 text-xs absolute p-[8px]">
+          {error && !formData.name && (
+            <p className="text-red-500 text-xs md:text-sm lg:text-base mt-1">
               Field is Required
-            </span>
+            </p>
           )}
         </div>
+        {/* Email Input */}
         <div>
           <input
-            className="border-2 border-blue-500 rounded-lg px-4 py-2"
+            className="w-full text-sm sm:text-base md:text-lg lg:text-xl lg:w-96 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 transition"
             type="email"
+            name="email"
             placeholder="Enter Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={formData.email}
+            onChange={handleChange}
           />
-          {error && !email && (
-            <span className="text-red-500 text-xs absolute p-[8px]">
+          {error && !formData.email && (
+            <p className="text-red-500 text-xs md:text-sm lg:text-base mt-1">
               Field is Required
-            </span>
+            </p>
           )}
         </div>
+        {/* Password Input */}
         <div>
           <input
-            className="border-2 border-blue-500 rounded-lg px-4 py-2"
+            className="w-full text-sm sm:text-base md:text-lg lg:text-xl border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 transition"
             type="password"
+            name="password"
             placeholder="Enter Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={formData.password}
+            onChange={handleChange}
           />
-          {passwordError && (
-            <span className="text-red-500 text-xs absolute p-[8px]">
-              Password and Confirm Password should be same
-            </span>
-          )}
-          {error && !password && (
-            <span className="text-red-500 text-xs absolute p-[8px]">
+          {error && !formData.password && (
+            <p className="text-red-500 text-xs md:text-sm lg:text-base mt-1">
               Field is Required
-            </span>
+            </p>
+          )}
+          {passwordError && (
+            <p className="text-red-500 text-xs md:text-sm lg:text-base mt-1">
+              Password and Confirm Password should match
+            </p>
           )}
         </div>
-
+        {/* Confirm Password Input */}
         <div>
           <input
-            className="border-2 border-blue-500 rounded-lg px-4 py-2"
+            className="w-full text-sm sm:text-base md:text-lg lg:text-xl lg:w-96 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 transition"
             type="password"
-            placeholder="Enter Confirm Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            name="confirmPassword"
+            placeholder="Confirm Password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
           />
+          {error && !formData.confirmPassword && (
+            <p className="text-red-500 text-xs md:text-sm lg:text-base mt-1">
+              Field is Required
+            </p>
+          )}
           {passwordError && (
-            <span className="text-red-500 text-xs absolute p-[8px]">
-              Password and Confirm Password should be same
-            </span>
-          )}
-          {error && !confirmPassword && (
-            <span className="text-red-500 text-xs absolute p-[8px]">
-              Field is Required
-            </span>
+            <p className="text-red-500 text-xs md:text-sm lg:text-base mt-1">
+              Password and Confirm Password should match
+            </p>
           )}
         </div>
-
+        {/* City Input */}
         <div>
           <input
-            className="border-2 border-blue-500 rounded-lg px-4 py-2"
+            className="w-full text-sm sm:text-base md:text-lg lg:text-xl lg:w-96 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 transition"
             type="text"
+            name="city"
             placeholder="Enter City"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
+            value={formData.city}
+            onChange={handleChange}
           />
-          {error && !city && (
-            <span className="text-red-500 text-xs absolute p-[8px]">
+          {error && !formData.city && (
+            <p className="text-red-500 text-xs md:text-sm lg:text-base mt-1">
               Field is Required
-            </span>
+            </p>
           )}
         </div>
+        {/* Address Input */}
         <div>
           <input
-            className="border-2 border-blue-500 rounded-lg px-4 py-2"
+            className="w-full text-sm sm:text-base md:text-lg lg:text-xl lg:w-96 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 transition"
             type="text"
+            name="address"
             placeholder="Enter Address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            value={formData.address}
+            onChange={handleChange}
           />
-          {error && !address && (
-            <span className="text-red-500 text-xs absolute p-[8px]">
+          {error && !formData.address && (
+            <p className="text-red-500 text-xs md:text-sm lg:text-base mt-1">
               Field is Required
-            </span>
+            </p>
           )}
         </div>
+        {/* Contact Input */}
         <div>
           <input
-            className="border-2 border-blue-500 rounded-lg px-4 py-2"
+            className="w-full text-sm sm:text-base md:text-lg lg:text-xl lg:w-96 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 transition"
             type="tel"
+            name="contact"
             placeholder="Enter Contact Number"
-            value={contact}
-            onChange={(e) => setContact(e.target.value)}
+            value={formData.contact}
+            onChange={handleChange}
           />
-          {error && !contact && (
-            <span className="text-red-500 text-xs absolute p-[8px]">
+          {error && !formData.contact && (
+            <p className="text-red-500 text-xs md:text-sm lg:text-base mt-1">
               Field is Required
-            </span>
+            </p>
           )}
         </div>
+        {/* Sign Up Button */}
         <div>
           <button
-            className="bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600 w-[100px]"
+            className="w-full text-sm sm:text-base md:text-lg lg:text-xl lg:w-96 bg-blue-500 text-white rounded-lg px-4 py-3 hover:bg-blue-600 transition"
             type="submit"
             onClick={handleSignUp}
           >
-            SignUp
+            Sign Up
           </button>
         </div>
       </div>
