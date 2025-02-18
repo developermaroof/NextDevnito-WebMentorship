@@ -33,9 +33,7 @@ const EditCourse = () => {
   }, []);
 
   const loadCourse = async () => {
-    let response = await fetch(
-      `http://localhost:3000/api/teacher/courses/edit/${params.id}`
-    );
+    let response = await fetch(`/api/teacher/courses/edit/${params.id}`);
     response = await response.json();
     if (response.success) {
       console.log("response.result: ", response.result);
@@ -88,13 +86,10 @@ const EditCourse = () => {
       formData.append("file", formResources.file);
     }
 
-    let response = await fetch(
-      `http://localhost:3000/api/teacher/courses/edit/${params.id}`,
-      {
-        method: "PUT",
-        body: formData,
-      }
-    );
+    let response = await fetch(`/api/teacher/courses/edit/${params.id}`, {
+      method: "PUT",
+      body: formData,
+    });
     response = await response.json();
     if (response.success) {
       toast.success("Course Updated Successfully!");

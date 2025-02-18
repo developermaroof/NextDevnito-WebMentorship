@@ -18,9 +18,7 @@ const Courses = () => {
   const loadCourses = async () => {
     const teacherData = JSON.parse(localStorage.getItem("teacher"));
     const teacher_id = teacherData._id;
-    let response = await fetch(
-      `http://localhost:3000/api/teacher/courses/${teacher_id}`
-    );
+    let response = await fetch(`/api/teacher/courses/${teacher_id}`);
     response = await response.json();
     if (response.success) {
       setCourses(response.result);
@@ -30,12 +28,9 @@ const Courses = () => {
   };
 
   const handleDeleteCourse = async (id) => {
-    let response = await fetch(
-      `http://localhost:3000/api/teacher/courses/${id}`,
-      {
-        method: "DELETE",
-      }
-    );
+    let response = await fetch(`/api/teacher/courses/${id}`, {
+      method: "DELETE",
+    });
     response = await response.json();
     if (response.success) {
       toast.success("Course Deleted Successfully!");

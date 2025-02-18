@@ -76,7 +76,7 @@ const AddCourse = () => {
     // Note: The browser automatically sets the Content-Type header for FormData with the proper boundary
 
     // Send a POST request to the API endpoint with the form data
-    let response = await fetch("http://localhost:3000/api/teacher/courses", {
+    let response = await fetch("/api/teacher/courses", {
       method: "POST",
       body: formData,
     });
