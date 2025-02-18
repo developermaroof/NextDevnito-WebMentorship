@@ -25,6 +25,7 @@ const TeacherSignup = () => {
     const { name, email, password, confirmPassword, city, address, contact } =
       formData;
 
+    // Check if passwords match
     if (password !== confirmPassword) {
       setPasswordError(true);
       return;
@@ -32,6 +33,7 @@ const TeacherSignup = () => {
       setPasswordError(false);
     }
 
+    // Check for empty fields
     if (
       !name ||
       !email ||
@@ -45,6 +47,20 @@ const TeacherSignup = () => {
       return;
     } else {
       setError(false);
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+
+    // Validate contact number to ensure it contains only digits
+    const phoneRegex = /^\d+$/;
+    if (!phoneRegex.test(contact)) {
+      toast.error("Please enter a valid contact number (only digits).");
+      return;
     }
 
     let response = await fetch("/api/teacher", {
@@ -62,7 +78,7 @@ const TeacherSignup = () => {
   };
 
   return (
-    <div className=" flex flex-col items-center justify-center">
+    <div className="flex flex-col items-center justify-center">
       <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center text-gray-800 mb-6 md:mb-8 lg:mb-10">
         TEACHER SIGNUP
       </h1>
