@@ -25,10 +25,20 @@ const EditCourse = () => {
     seoDescription: "",
   });
   const [error, setError] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null); // State for image preview
 
   useEffect(() => {
     loadCourse();
   }, []);
+
+  // Clean up object URL when the preview changes or component unmounts
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const loadCourse = async () => {
     let response = await fetch(`/api/teacher/courses/edit/${params.id}`);
@@ -43,12 +53,15 @@ const EditCourse = () => {
         contentType: response.result.contentType,
         uploadTitle: response.result.uploadTitle,
         uploadDescription: response.result.uploadDescription,
-        file: null,
+        file: null, // existing file can be loaded if needed
       });
       setFormSeo({
         ppt: response.result.ppt,
         seoDescription: response.result.seoDescription,
       });
+
+      // If there's an existing image URL from the server and you want to preview it,
+      // you could set previewUrl here (e.g., response.result.imageUrl)
     }
   };
 
@@ -95,9 +108,9 @@ const EditCourse = () => {
       toast.error("Failed to update course!");
     }
   };
+
   return (
     <div>
-      {/* Header section with a flex container for the title and action buttons */}
       <div className="flex justify-between items-center p-2 py-4">
         <h1 className="text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl font-bold">
           Edit Course
@@ -111,11 +124,8 @@ const EditCourse = () => {
         </button>
       </div>
 
-      {/* Main content container with padding */}
       <div className="p-2 py-4">
-        {/* Tab header section with three buttons for switching between tabs */}
         <div className="flex gap-2 mb-6 border-b-[1px] border-gray-300">
-          {/* Details tab button: active styling if activeTab equals "details" */}
           <button
             className={`px-4 py-2 rounded-lg ${
               activeTab === "details"
@@ -126,8 +136,6 @@ const EditCourse = () => {
           >
             Details
           </button>
-
-          {/* Resources tab button: active styling if activeTab equals "resources" */}
           <button
             className={`px-4 py-2 rounded-lg ${
               activeTab === "resources"
@@ -138,8 +146,6 @@ const EditCourse = () => {
           >
             Resources
           </button>
-
-          {/* SEO tab button: active styling if activeTab equals "seo" */}
           <button
             className={`px-4 py-2 rounded-lg ${
               activeTab === "seo"
@@ -153,10 +159,8 @@ const EditCourse = () => {
         </div>
 
         <div className="space-y-4">
-          {/* Render the Details tab content if activeTab is "details" */}
           {activeTab === "details" && (
             <>
-              {/* Header for the Details section */}
               <div className="flex flex-col">
                 <h2 className="text-md lg:text-lg xl:text-xl 2xl:text-2xl font-semibold">
                   Course Details
@@ -166,9 +170,7 @@ const EditCourse = () => {
                 </p>
               </div>
 
-              {/* Form fields for course details with spacing and padding */}
               <div className="space-y-4 p-2">
-                {/* Input container for the course title */}
                 <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
                   <label
                     className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-600"
@@ -182,17 +184,14 @@ const EditCourse = () => {
                     className="w-full text-sm lg:text-base xl:text-lg 2xl:text-xl rounded-lg focus:outline-none"
                     value={formDetails.title}
                     onChange={(e) =>
-                      // Update the formDetails state with the new title value
                       setFormDetails({ ...formDetails, title: e.target.value })
                     }
                   />
                 </div>
-                {/* Display error message if title is missing and error state is true */}
                 {error && !formDetails.title && (
                   <span className="text-red-500">Required</span>
                 )}
 
-                {/* Input container for the course subtitle */}
                 <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
                   <label
                     className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-600"
@@ -206,7 +205,6 @@ const EditCourse = () => {
                     className="w-full text-sm lg:text-base xl:text-lg 2xl:text-xl rounded-lg focus:outline-none"
                     value={formDetails.subtitle}
                     onChange={(e) =>
-                      // Update the formDetails state with the new subtitle value
                       setFormDetails({
                         ...formDetails,
                         subtitle: e.target.value,
@@ -214,12 +212,10 @@ const EditCourse = () => {
                     }
                   />
                 </div>
-                {/* Display error message if subtitle is missing and error state is true */}
                 {error && !formDetails.subtitle && (
                   <span className="text-red-500">Required</span>
                 )}
 
-                {/* Input container for the course description */}
                 <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
                   <label
                     className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-600"
@@ -232,7 +228,6 @@ const EditCourse = () => {
                     className="w-full text-sm lg:text-base xl:text-lg 2xl:text-xl rounded-lg focus:outline-none"
                     value={formDetails.description}
                     onChange={(e) =>
-                      // Update the formDetails state with the new description value
                       setFormDetails({
                         ...formDetails,
                         description: e.target.value,
@@ -240,7 +235,6 @@ const EditCourse = () => {
                     }
                   />
                 </div>
-                {/* Display error message if description is missing and error state is true */}
                 {error && !formDetails.description && (
                   <span className="text-red-500">Required</span>
                 )}
@@ -248,10 +242,8 @@ const EditCourse = () => {
             </>
           )}
 
-          {/* Render the Resources tab content if activeTab is "resources" */}
           {activeTab === "resources" && (
             <>
-              {/* Header for the Resources section */}
               <div className="flex flex-col">
                 <h2 className="text-md lg:text-lg xl:text-xl 2xl:text-2xl font-semibold">
                   Upload Notes
@@ -262,7 +254,6 @@ const EditCourse = () => {
               </div>
 
               <div className="space-y-4 p-2">
-                {/* Input container for content type */}
                 <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
                   <label
                     className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-600"
@@ -276,7 +267,6 @@ const EditCourse = () => {
                     className="w-full text-sm lg:text-base xl:text-lg 2xl:text-xl rounded-lg focus:outline-none"
                     value={formResources.contentType}
                     onChange={(e) =>
-                      // Update the formResources state with the new content type value
                       setFormResources({
                         ...formResources,
                         contentType: e.target.value,
@@ -284,12 +274,10 @@ const EditCourse = () => {
                     }
                   />
                 </div>
-                {/* Display error message if content type is missing and error state is true */}
                 {error && !formResources.contentType && (
                   <span className="text-red-500">Required</span>
                 )}
 
-                {/* Input container for resource title */}
                 <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
                   <label
                     className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-600"
@@ -303,7 +291,6 @@ const EditCourse = () => {
                     className="w-full text-sm lg:text-base xl:text-lg 2xl:text-xl rounded-lg focus:outline-none"
                     value={formResources.uploadTitle}
                     onChange={(e) =>
-                      // Update the formResources state with the new upload title value
                       setFormResources({
                         ...formResources,
                         uploadTitle: e.target.value,
@@ -311,12 +298,10 @@ const EditCourse = () => {
                     }
                   />
                 </div>
-                {/* Display error message if upload title is missing and error state is true */}
                 {error && !formResources.uploadTitle && (
                   <span className="text-red-500">Required</span>
                 )}
 
-                {/* Input container for resource description */}
                 <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
                   <label
                     className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-600"
@@ -329,7 +314,6 @@ const EditCourse = () => {
                     className="w-full text-sm lg:text-base xl:text-lg 2xl:text-xl rounded-lg focus:outline-none"
                     value={formResources.uploadDescription}
                     onChange={(e) =>
-                      // Update the formResources state with the new upload description value
                       setFormResources({
                         ...formResources,
                         uploadDescription: e.target.value,
@@ -337,12 +321,10 @@ const EditCourse = () => {
                     }
                   />
                 </div>
-                {/* Display error message if upload description is missing and error state is true */}
                 {error && !formResources.uploadDescription && (
                   <span className="text-red-500">Required</span>
                 )}
 
-                {/* Container for file upload input */}
                 <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
                   <label
                     className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-600 block mb-2"
@@ -350,29 +332,27 @@ const EditCourse = () => {
                   >
                     Upload File
                   </label>
-                  {/* Relative container to position the hidden file input */}
                   <div className="relative">
-                    {/* Hidden file input overlayed over the styled div */}
                     <input
                       type="file"
                       id="file"
                       name="file"
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       onChange={(e) => {
-                        // Get the first selected file from the file input
                         const selectedFile = e.target.files[0];
-                        // Update formResources state with the selected file and automatically set its MIME type
-                        setFormResources({
-                          ...formResources,
-                          file: selectedFile,
-                          contentType: selectedFile.type,
-                        });
+                        if (selectedFile) {
+                          setFormResources({
+                            ...formResources,
+                            file: selectedFile,
+                            contentType: selectedFile.type,
+                          });
+                          const url = URL.createObjectURL(selectedFile);
+                          setPreviewUrl(url);
+                        }
                       }}
                     />
 
-                    {/* Styled container for drag and drop file upload UI */}
                     <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg hover:border-blue-500 transition-colors">
-                      {/* SVG icon for file upload */}
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-12 w-12 text-gray-400 mb-2"
@@ -387,34 +367,62 @@ const EditCourse = () => {
                           d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                         />
                       </svg>
-                      {/* Instructional text for file upload */}
                       <p className="text-gray-600">
-                        Drag and drop files here or
+                        Drag and drop files here or{" "}
                         <span className="text-blue-600 font-medium">
                           browse
                         </span>
                       </p>
-                      {/* Information on supported file formats */}
                       <p className="text-sm text-gray-500 mt-2">
                         Supported formats: PDF, DOC, PPT
                       </p>
                     </div>
-                    {/* If a file is selected, display its name */}
                     {formResources.file && (
                       <p className="mt-2 text-sm text-gray-600">
                         Selected file: {formResources.file.name}
                       </p>
                     )}
                   </div>
+
+                  {/* Preview container */}
+                  {previewUrl && (
+                    <div className="relative mt-4 w-full max-w-xs">
+                      <button
+                        onClick={() => {
+                          setPreviewUrl(null);
+                          setFormResources({ ...formResources, file: null });
+                        }}
+                        className="absolute top-1 right-1 bg-gray-200 rounded-full p-1 hover:bg-gray-300 z-10"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                      <img
+                        src={previewUrl}
+                        alt="Preview"
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </>
           )}
 
-          {/* Render the SEO tab content if activeTab is "seo" */}
           {activeTab === "seo" && (
             <>
-              {/* Header for the SEO section */}
               <div className="flex flex-col">
                 <h2 className="text-md lg:text-lg xl:text-xl 2xl:text-2xl font-semibold">
                   SEO
@@ -425,7 +433,6 @@ const EditCourse = () => {
               </div>
 
               <div className="space-y-4 p-2">
-                {/* Input container for PPT Title */}
                 <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
                   <label
                     className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-600"
@@ -439,7 +446,6 @@ const EditCourse = () => {
                     className="w-full text-sm lg:text-base xl:text-lg 2xl:text-xl rounded-lg focus:outline-none"
                     value={formSeo.ppt}
                     onChange={(e) =>
-                      // Update formSeo state with the new PPT title value
                       setFormSeo({
                         ...formSeo,
                         ppt: e.target.value,
@@ -447,12 +453,10 @@ const EditCourse = () => {
                     }
                   />
                 </div>
-                {/* Display error message if PPT title is missing and error state is true */}
                 {error && !formSeo.ppt && (
                   <span className="text-red-500">Required</span>
                 )}
 
-                {/* Input container for SEO Description */}
                 <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
                   <label
                     className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-600"
@@ -466,7 +470,6 @@ const EditCourse = () => {
                     className="w-full text-sm lg:text-base xl:text-lg 2xl:text-xl rounded-lg focus:outline-none"
                     value={formSeo.seoDescription}
                     onChange={(e) =>
-                      // Update formSeo state with the new SEO description value
                       setFormSeo({
                         ...formSeo,
                         seoDescription: e.target.value,
@@ -474,7 +477,6 @@ const EditCourse = () => {
                     }
                   />
                 </div>
-                {/* Display error message if SEO description is missing and error state is true */}
                 {error && !formSeo.seoDescription && (
                   <span className="text-red-500">Required</span>
                 )}
