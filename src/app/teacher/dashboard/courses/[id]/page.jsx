@@ -8,8 +8,6 @@ const EditCourse = () => {
   const params = useParams();
   const router = useRouter();
 
-  console.log("Course ID:", params.id);
-
   const [activeTab, setActiveTab] = useState("details");
   const [formDetails, setFormDetails] = useState({
     title: "",
@@ -36,7 +34,6 @@ const EditCourse = () => {
     let response = await fetch(`/api/teacher/courses/edit/${params.id}`);
     response = await response.json();
     if (response.success) {
-      console.log("response.result: ", response.result);
       setFormDetails({
         title: response.result.title,
         subtitle: response.result.subtitle,

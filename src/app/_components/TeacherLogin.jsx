@@ -10,7 +10,6 @@ const TeacherLogin = () => {
   const router = useRouter();
 
   const handleLogin = async () => {
-    console.log(email, password);
     if (!email || !password) {
       setError(true);
       return;

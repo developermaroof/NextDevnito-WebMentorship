@@ -38,7 +38,6 @@ const TeacherSignup = () => {
       setError(false);
     }
 
-    console.log(name, email, password, confirmPassword, city, address, contact);
     let response = await fetch("/api/teacher", {
       method: "POST",
       body: JSON.stringify({
@@ -51,7 +50,6 @@ const TeacherSignup = () => {
       }),
     });
     response = await response.json();
-    console.log(response);
     if (response.success) {
       toast.success("Teacher SignedUp Successfully!");
       const { result } = response;
