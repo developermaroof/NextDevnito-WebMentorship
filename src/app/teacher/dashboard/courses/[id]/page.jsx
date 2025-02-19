@@ -26,6 +26,7 @@ const EditCourse = () => {
   });
   const [error, setError] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null); // State for image preview
+  const [loading, setLoading] = useState(false); // Add loading state
 
   useEffect(() => {
     loadCourse();
@@ -82,30 +83,37 @@ const EditCourse = () => {
       setError(false);
     }
 
-    const formData = new FormData();
-    formData.append("title", formDetails.title);
-    formData.append("subtitle", formDetails.subtitle);
-    formData.append("description", formDetails.description);
-    formData.append("contentType", formResources.contentType);
-    formData.append("uploadTitle", formResources.uploadTitle);
-    formData.append("uploadDescription", formResources.uploadDescription);
-    formData.append("ppt", formSeo.ppt);
-    formData.append("seoDescription", formSeo.seoDescription);
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("title", formDetails.title);
+      formData.append("subtitle", formDetails.subtitle);
+      formData.append("description", formDetails.description);
+      formData.append("contentType", formResources.contentType);
+      formData.append("uploadTitle", formResources.uploadTitle);
+      formData.append("uploadDescription", formResources.uploadDescription);
+      formData.append("ppt", formSeo.ppt);
+      formData.append("seoDescription", formSeo.seoDescription);
 
-    if (formResources.file && formResources.file instanceof File) {
-      formData.append("file", formResources.file);
-    }
+      if (formResources.file && formResources.file instanceof File) {
+        formData.append("file", formResources.file);
+      }
 
-    let response = await fetch(`/api/teacher/courses/edit/${params.id}`, {
-      method: "PUT",
-      body: formData,
-    });
-    response = await response.json();
-    if (response.success) {
-      toast.success("Course Updated Successfully!");
-      router.push("/teacher/dashboard/courses");
-    } else {
+      let response = await fetch(`/api/teacher/courses/edit/${params.id}`, {
+        method: "PUT",
+        body: formData,
+      });
+      response = await response.json();
+      if (response.success) {
+        toast.success("Course Updated Successfully!");
+        router.push("/teacher/dashboard/courses");
+      } else {
+        toast.error("Failed to update course!");
+      }
+    } catch (error) {
       toast.error("Failed to update course!");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -117,10 +125,19 @@ const EditCourse = () => {
         </h1>
 
         <button
-          className="text-xs lg:text-sm xl:text-base 2xl:text-lg px-4 lg:px-6 xl:px-8 py-2 lg:py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          className={`text-xs lg:text-sm xl:text-base 2xl:text-lg px-4 lg:px-6 xl:px-8 py-2 lg:py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 ${
+            loading && "opacity-50 cursor-not-allowed"
+          }`}
           onClick={handleEdit}
         >
-          Update
+          {loading ? (
+            <div className="flex items-center gap-2">
+              <span>Updating...</span>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            </div>
+          ) : (
+            "Update"
+          )}
         </button>
       </div>
 

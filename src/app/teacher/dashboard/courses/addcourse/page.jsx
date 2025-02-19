@@ -23,10 +23,10 @@ const AddCourse = () => {
     seoDescription: "",
   });
   const [error, setError] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState(null); // New state for image preview
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [loading, setLoading] = useState(false); // Add loading state
   const router = useRouter();
 
-  // Clean up the created object URL when component unmounts or when file changes
   useEffect(() => {
     return () => {
       if (previewUrl) {
@@ -36,7 +36,6 @@ const AddCourse = () => {
   }, [previewUrl]);
 
   const handleSubmit = async () => {
-    // Basic field validation
     if (
       !formDetails.title ||
       !formDetails.subtitle ||
@@ -53,39 +52,46 @@ const AddCourse = () => {
       setError(false);
     }
 
-    // Get teacher_id from localStorage if available
-    let teacher_id;
-    const teacherData = JSON.parse(localStorage.getItem("teacher"));
-    if (teacherData) {
-      teacher_id = teacherData._id;
-    }
+    try {
+      setLoading(true);
+      // Get teacher_id from localStorage if available
+      let teacher_id;
+      const teacherData = JSON.parse(localStorage.getItem("teacher"));
+      if (teacherData) {
+        teacher_id = teacherData._id;
+      }
 
-    const formData = new FormData();
-    formData.append("title", formDetails.title);
-    formData.append("subtitle", formDetails.subtitle);
-    formData.append("description", formDetails.description);
-    formData.append("contentType", formResources.contentType);
-    formData.append("uploadTitle", formResources.uploadTitle);
-    formData.append("uploadDescription", formResources.uploadDescription);
-    formData.append("ppt", formSeo.ppt);
-    formData.append("seoDescription", formSeo.seoDescription);
-    formData.append("teacher_id", teacher_id);
+      const formData = new FormData();
+      formData.append("title", formDetails.title);
+      formData.append("subtitle", formDetails.subtitle);
+      formData.append("description", formDetails.description);
+      formData.append("contentType", formResources.contentType);
+      formData.append("uploadTitle", formResources.uploadTitle);
+      formData.append("uploadDescription", formResources.uploadDescription);
+      formData.append("ppt", formSeo.ppt);
+      formData.append("seoDescription", formSeo.seoDescription);
+      formData.append("teacher_id", teacher_id);
 
-    if (formResources.file) {
-      formData.append("file", formResources.file);
-    }
+      if (formResources.file) {
+        formData.append("file", formResources.file);
+      }
 
-    let response = await fetch("/api/teacher/courses", {
-      method: "POST",
-      body: formData,
-    });
+      let response = await fetch("/api/teacher/courses", {
+        method: "POST",
+        body: formData,
+      });
 
-    response = await response.json();
-    if (response.success) {
-      toast.success("Course Created Successfully!");
-      router.push("/teacher/dashboard/courses");
-    } else {
-      toast.error("Failed to create course!");
+      response = await response.json();
+      if (response.success) {
+        toast.success("Course Created Successfully!");
+        router.push("/teacher/dashboard/courses");
+      } else {
+        toast.error("Failed to create course!");
+      }
+    } catch (error) {
+      toast.error("An error occurred while submitting the form");
+    } finally {
+      setLoading(false); // Disable loading state
     }
   };
 
@@ -96,10 +102,20 @@ const AddCourse = () => {
           Add Course
         </h1>
         <button
-          className="text-xs lg:text-sm xl:text-base 2xl:text-lg px-4 lg:px-6 xl:px-8 py-2 lg:py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          className={`text-xs lg:text-sm xl:text-base 2xl:text-lg px-4 lg:px-6 xl:px-8 py-2 lg:py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 ${
+            loading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
           onClick={handleSubmit}
+          disabled={loading}
         >
-          Submit
+          {loading ? (
+            <div className="flex items-center gap-2">
+              <span>Submitting...</span>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            </div>
+          ) : (
+            "Submit"
+          )}
         </button>
       </div>
 

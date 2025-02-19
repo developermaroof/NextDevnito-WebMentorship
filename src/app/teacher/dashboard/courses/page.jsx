@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 const Courses = () => {
   const [courses, setCourses] = useState();
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -28,16 +29,27 @@ const Courses = () => {
   };
 
   const handleDeleteCourse = async (id) => {
-    let response = await fetch(`/api/teacher/courses/${id}`, {
-      method: "DELETE",
-    });
-    response = await response.json();
-    if (response.success) {
-      toast.success("Course Deleted Successfully!");
-      loadCourses();
-    } else {
+    try {
+      setLoading(true);
+      let response = await fetch(`/api/teacher/courses/${id}`, {
+        method: "DELETE",
+      });
+      response = await response.json();
+      if (response.success) {
+        toast.success("Course Deleted Successfully!");
+        loadCourses();
+      } else {
+        toast.error("Failed to delete course!");
+      }
+    } catch (error) {
       toast.error("Failed to delete course!");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleNavigate = () => {
+    router.push("/teacher/dashboard/courses/addcourse");
   };
 
   const handleMenuToggle = (index) => {
@@ -51,8 +63,11 @@ const Courses = () => {
           Courses
         </h1>
         <div className="flex items-center gap-2">
-          <button className="text-xs lg:text-sm xl:text-base 2xl:text-lg px-3 lg:px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-            <Link href="/teacher/dashboard/courses/addcourse">Add Course</Link>
+          <button
+            onClick={handleNavigate}
+            className="text-xs lg:text-sm xl:text-base 2xl:text-lg px-3 lg:px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          >
+            Add Course
           </button>
           <button className="p-2 hover:bg-gray-100 rounded-full">
             <svg
@@ -129,9 +144,18 @@ const Courses = () => {
                         </button>
                         <button
                           onClick={() => handleDeleteCourse(item._id)}
-                          className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100"
+                          className={`w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100 ${
+                            loading && "opacity-50 cursor-not-allowed"
+                          }`}
                         >
-                          Delete
+                          {loading ? (
+                            <div className="flex items-center gap-2">
+                              <span>Deleting...</span>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            </div>
+                          ) : (
+                            "Delete"
+                          )}
                         </button>
                       </div>
                     )}
