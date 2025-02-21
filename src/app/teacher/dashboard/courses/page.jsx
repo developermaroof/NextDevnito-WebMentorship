@@ -165,15 +165,15 @@ const Courses = () => {
                 {item.file && (
                   <div className="mt-2">
                     {item.contentType &&
-                    item.contentType.startsWith("image/") ? (
+                    item.contentType.startsWith("image") ? (
                       <img
-                        src={`/uploads/${item.file}`}
+                        src={item.file} // Use the Cloudinary URL directly
                         alt={item.uploadTitle || "Course File"}
                         className="w-full h-auto object-cover rounded"
                       />
                     ) : (
                       <a
-                        href={`/uploads/${item.file}`}
+                        href={item.file} // Use the Cloudinary URL directly
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-500 underline"

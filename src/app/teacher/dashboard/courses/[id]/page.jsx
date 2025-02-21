@@ -18,7 +18,7 @@ const EditCourse = () => {
     contentType: "",
     uploadTitle: "",
     uploadDescription: "",
-    file: null,
+    file: null, // will be a File object or existing URL string
   });
   const [formSeo, setFormSeo] = useState({
     ppt: "",
@@ -26,16 +26,17 @@ const EditCourse = () => {
   });
   const [error, setError] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null); // State for image preview
-  const [loading, setLoading] = useState(false); // Add loading state
+  const [loading, setLoading] = useState(false);
 
+  // On mount, load the course data.
   useEffect(() => {
     loadCourse();
   }, []);
 
-  // Clean up object URL when the preview changes or component unmounts
+  // Clean up object URL when preview changes/unmounts.
   useEffect(() => {
     return () => {
-      if (previewUrl) {
+      if (previewUrl && previewUrl.startsWith("blob:")) {
         URL.revokeObjectURL(previewUrl);
       }
     };
@@ -45,6 +46,7 @@ const EditCourse = () => {
     let response = await fetch(`/api/teacher/courses/edit/${params.id}`);
     response = await response.json();
     if (response.success) {
+      // Set form details
       setFormDetails({
         title: response.result.title,
         subtitle: response.result.subtitle,
@@ -54,16 +56,50 @@ const EditCourse = () => {
         contentType: response.result.contentType,
         uploadTitle: response.result.uploadTitle,
         uploadDescription: response.result.uploadDescription,
-        file: null, // existing file can be loaded if needed
+        file: response.result.file || null, // existing Cloudinary URL
       });
       setFormSeo({
         ppt: response.result.ppt,
         seoDescription: response.result.seoDescription,
       });
-
-      // If there's an existing image URL from the server and you want to preview it,
-      // you could set previewUrl here (e.g., response.result.imageUrl)
+      // Set preview URL from the existing image if available.
+      if (response.result.file) {
+        setPreviewUrl(response.result.file);
+      }
+    } else {
+      toast.error("Failed to load course data!");
     }
+  };
+
+  // Handle new file selection and preview generation.
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFormResources({
+        ...formResources,
+        file: selectedFile, // store the File object
+        contentType: selectedFile.type,
+      });
+      const url = URL.createObjectURL(selectedFile);
+      setPreviewUrl(url);
+    }
+  };
+
+  // Upload the file to Cloudinary (using your unsigned preset).
+  const uploadToCloudinary = async (file) => {
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", "nextjspreset"); // your unsigned preset
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`,
+      {
+        method: "POST",
+        body: data,
+      }
+    );
+    const json = await res.json();
+    return json.secure_url;
   };
 
   const handleEdit = async () => {
@@ -85,6 +121,16 @@ const EditCourse = () => {
 
     try {
       setLoading(true);
+      let fileUrl = "";
+
+      // If the file is a new File (instanceof File), upload it.
+      if (formResources.file instanceof File) {
+        fileUrl = await uploadToCloudinary(formResources.file);
+      } else if (typeof formResources.file === "string") {
+        // Use existing URL if no new file is chosen.
+        fileUrl = formResources.file;
+      }
+
       const formData = new FormData();
       formData.append("title", formDetails.title);
       formData.append("subtitle", formDetails.subtitle);
@@ -94,9 +140,8 @@ const EditCourse = () => {
       formData.append("uploadDescription", formResources.uploadDescription);
       formData.append("ppt", formSeo.ppt);
       formData.append("seoDescription", formSeo.seoDescription);
-
-      if (formResources.file && formResources.file instanceof File) {
-        formData.append("file", formResources.file);
+      if (fileUrl) {
+        formData.append("file", fileUrl);
       }
 
       let response = await fetch(`/api/teacher/courses/edit/${params.id}`, {
@@ -111,6 +156,7 @@ const EditCourse = () => {
         toast.error("Failed to update course!");
       }
     } catch (error) {
+      console.error(error);
       toast.error("Failed to update course!");
     } finally {
       setLoading(false);
@@ -123,12 +169,12 @@ const EditCourse = () => {
         <h1 className="text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl font-bold">
           Edit Course
         </h1>
-
         <button
           className={`text-xs lg:text-sm xl:text-base 2xl:text-lg px-4 lg:px-6 xl:px-8 py-2 lg:py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 ${
             loading && "opacity-50 cursor-not-allowed"
           }`}
           onClick={handleEdit}
+          disabled={loading}
         >
           {loading ? (
             <div className="flex items-center gap-2">
@@ -355,20 +401,9 @@ const EditCourse = () => {
                       id="file"
                       name="file"
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      onChange={(e) => {
-                        const selectedFile = e.target.files[0];
-                        if (selectedFile) {
-                          setFormResources({
-                            ...formResources,
-                            file: selectedFile,
-                            contentType: selectedFile.type,
-                          });
-                          const url = URL.createObjectURL(selectedFile);
-                          setPreviewUrl(url);
-                        }
-                      }}
+                      accept="image/*"
+                      onChange={handleFileChange}
                     />
-
                     <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg hover:border-blue-500 transition-colors">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -394,11 +429,12 @@ const EditCourse = () => {
                         Supported formats: PDF, DOC, PPT
                       </p>
                     </div>
-                    {formResources.file && (
-                      <p className="mt-2 text-sm text-gray-600">
-                        Selected file: {formResources.file.name}
-                      </p>
-                    )}
+                    {formResources.file &&
+                      typeof formResources.file !== "string" && (
+                        <p className="mt-2 text-sm text-gray-600">
+                          Selected file: {formResources.file.name}
+                        </p>
+                      )}
                   </div>
 
                   {/* Preview container */}

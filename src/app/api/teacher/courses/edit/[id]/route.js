@@ -1,5 +1,3 @@
-import fs from "fs";
-import path from "path";
 import { connectionString } from "@/utils/db";
 import { courseSchema } from "@/utils/models/courseModel";
 import mongoose from "mongoose";
@@ -19,22 +17,8 @@ export async function PUT(req, context) {
     const ppt = formData.get("ppt");
     const seoDescription = formData.get("seoDescription");
 
-    let fileValue = "";
-    const file = formData.get("file");
-    if (file && typeof file !== "string") {
-      const originalName = file.name;
-      const uniqueFileName = `${Date.now()}_${originalName}`;
-      const filePath = path.join(
-        process.cwd(),
-        "public",
-        "uploads",
-        uniqueFileName
-      );
-      const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      await fs.promises.writeFile(filePath, buffer);
-      fileValue = uniqueFileName;
-    }
+    // Expect file to be a Cloudinary URL string
+    const fileValue = formData.get("file") || "";
 
     const payload = {
       title,
