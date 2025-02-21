@@ -14,6 +14,8 @@ const TeacherSignup = () => {
   });
   const [error, setError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
+  const [emailError, setEmailError] = useState(false);
+  const [numberError, setNumberError] = useState(false);
 
   const router = useRouter();
 
@@ -52,15 +54,19 @@ const TeacherSignup = () => {
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      toast.error("Please enter a valid email address.");
+      setEmailError(true);
       return;
+    } else {
+      setEmailError(false);
     }
 
     // Validate contact number to ensure it contains only digits
     const phoneRegex = /^\d+$/;
     if (!phoneRegex.test(contact)) {
-      toast.error("Please enter a valid contact number (only digits).");
+      setNumberError(true);
       return;
+    } else {
+      setNumberError(false);
     }
 
     let response = await fetch("/api/teacher", {
@@ -112,6 +118,11 @@ const TeacherSignup = () => {
           {error && !formData.email && (
             <p className="text-red-500 text-xs md:text-sm lg:text-base mt-1">
               Field is Required
+            </p>
+          )}
+          {emailError && (
+            <p className="text-red-500 text-xs md:text-sm lg:text-base mt-1">
+              Please enter a valid email address
             </p>
           )}
         </div>
@@ -183,6 +194,11 @@ const TeacherSignup = () => {
             value={formData.address}
             onChange={handleChange}
           />
+          {numberError && (
+            <p className="text-red-500 text-xs md:text-sm lg:text-base mt-1">
+              Please enter a valid contact number (Only digits allowed)
+            </p>
+          )}
           {error && !formData.address && (
             <p className="text-red-500 text-xs md:text-sm lg:text-base mt-1">
               Field is Required
@@ -193,7 +209,7 @@ const TeacherSignup = () => {
         <div>
           <input
             className="w-full text-sm sm:text-base md:text-lg lg:text-xl lg:w-96 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 transition"
-            type="tel"
+            type="number"
             name="contact"
             placeholder="Enter Contact Number"
             value={formData.contact}

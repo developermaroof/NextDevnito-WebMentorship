@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import { toast } from "react-toastify";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -95,8 +94,9 @@ const Courses = () => {
       </div>
 
       <div className="flex flex-wrap gap-4">
-        {courses
-          ? courses.map((item, index) => (
+        {courses ? (
+          courses.length > 0 ? (
+            courses.map((item, index) => (
               <div key={index} className="relative border p-4 max-w-[300px]">
                 <div className="flex justify-between">
                   <div>
@@ -185,15 +185,21 @@ const Courses = () => {
                 )}
               </div>
             ))
-          : // Show 5 skeleton loaders while courses are undefined
-            Array.from({ length: 5 }).map((_, index) => (
-              <div key={index} className="border p-4 max-w-[300px]">
-                <SkeletonTheme baseColor="#f5f5f5" highlightColor="#67a4e6">
-                  <Skeleton height={30} width={200} />
-                  <Skeleton count={3} />
-                </SkeletonTheme>
-              </div>
-            ))}
+          ) : (
+            <div className="w-full text-center text-lg font-medium p-8">
+              No courses found.
+            </div>
+          ) // Show 5 skeleton loaders while courses are undefined
+        ) : (
+          Array.from({ length: 5 }).map((_, index) => (
+            <div key={index} className="border p-4 max-w-[300px]">
+              <SkeletonTheme baseColor="#f5f5f5" highlightColor="#67a4e6">
+                <Skeleton height={30} width={200} />
+                <Skeleton count={3} />
+              </SkeletonTheme>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
