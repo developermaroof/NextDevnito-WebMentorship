@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 const Roadmaps = () => {
   const [roadmaps, setRoadmaps] = useState();
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState(null); // Per-roadmap loading state
   const router = useRouter();
 
   useEffect(() => {
@@ -29,7 +29,7 @@ const Roadmaps = () => {
 
   const handleDeleteRoadmap = async (id) => {
     try {
-      setLoading(true);
+      setDeletingId(id); // Set the specific roadmap being deleted
       let response = await fetch(`/api/teacher/roadmaps/${id}`, {
         method: "DELETE",
       });
@@ -43,7 +43,7 @@ const Roadmaps = () => {
     } catch (error) {
       toast.error("Failed to delete roadmap!");
     } finally {
-      setLoading(false);
+      setDeletingId(null);
     }
   };
 
@@ -129,7 +129,6 @@ const Roadmaps = () => {
                         />
                       </svg>
                     </button>
-                    {/* Dropdown menu appears only for the roadmaps whose index matches openMenuIndex */}
                     {openMenuIndex === index && (
                       <div className="absolute right-0 mt-2 bg-white border rounded shadow z-10">
                         <button
@@ -145,10 +144,11 @@ const Roadmaps = () => {
                         <button
                           onClick={() => handleDeleteRoadmap(item._id)}
                           className={`w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100 ${
-                            loading && "opacity-50 cursor-not-allowed"
+                            deletingId === item._id &&
+                            "opacity-50 cursor-not-allowed"
                           }`}
                         >
-                          {loading ? (
+                          {deletingId === item._id ? (
                             <div className="flex items-center gap-2">
                               <span>Deleting...</span>
                               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -164,16 +164,22 @@ const Roadmaps = () => {
 
                 {item.file && (
                   <div className="mt-2">
-                    {item.contentType &&
-                    item.contentType.startsWith("image") ? (
-                      <img
-                        src={item.file} // Use the Cloudinary URL directly
-                        alt={item.uploadTitle || "Roadmap File"}
-                        className="w-full h-auto object-cover rounded"
-                      />
+                    {/* Check if resource_type is "image" to display as thumbnail */}
+                    {item.resource_type === "image" ? (
+                      <div className="w-32 h-32">
+                        {/* Use Cloudinary transformation for 128x128 thumbnail */}
+                        <img
+                          src={item.file.replace(
+                            "/upload/",
+                            "/upload/w_128,h_128,c_fill/"
+                          )}
+                          alt={item.title || "Roadmap Thumbnail"}
+                          className="w-full h-full object-cover rounded"
+                        />
+                      </div>
                     ) : (
                       <a
-                        href={item.file} // Use the Cloudinary URL directly
+                        href={item.file}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-500 underline"
@@ -189,7 +195,7 @@ const Roadmaps = () => {
             <div className="w-full text-center text-lg font-medium p-8">
               No roadmaps found.
             </div>
-          ) // Show 5 skeleton loaders while roadmaps are undefined
+          )
         ) : (
           Array.from({ length: 5 }).map((_, index) => (
             <div key={index} className="border p-4 max-w-[300px]">

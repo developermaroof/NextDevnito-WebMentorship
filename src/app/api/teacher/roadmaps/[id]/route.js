@@ -12,7 +12,6 @@ export async function GET(req, context) {
   if (result) {
     success = true;
   }
-
   return NextResponse.json({ result, success });
 }
 
@@ -25,6 +24,5 @@ export async function DELETE(req, context) {
   if (result.deletedCount > 0) {
     success = true;
   }
-
   return NextResponse.json({ result, success });
 }

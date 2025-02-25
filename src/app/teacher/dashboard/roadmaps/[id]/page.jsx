@@ -1,39 +1,29 @@
 "use client";
 
 import { useRouter, useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 
 const EditRoadmap = () => {
-  const params = useParams();
-  const router = useRouter();
-
-  const [activeTab, setActiveTab] = useState("details");
+  const [mounted, setMounted] = useState(false);
   const [formDetails, setFormDetails] = useState({
     title: "",
-    subtitle: "",
     description: "",
-  });
-  const [formResources, setFormResources] = useState({
-    contentType: "",
-    uploadTitle: "",
-    uploadDescription: "",
-    file: null, // will be a File object or existing URL string
-  });
-  const [formSeo, setFormSeo] = useState({
-    ppt: "",
-    seoDescription: "",
+    file: null,
   });
   const [error, setError] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState(null); // State for image preview
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const params = useParams();
 
-  // On mount, load the roadmap data.
+  // Load existing roadmap data and set mounted flag
   useEffect(() => {
+    setMounted(true);
     loadRoadmap();
   }, []);
 
-  // Clean up object URL when preview changes/unmounts.
+  // Cleanup blob URL on unmount or preview change
   useEffect(() => {
     return () => {
       if (previewUrl && previewUrl.startsWith("blob:")) {
@@ -42,54 +32,46 @@ const EditRoadmap = () => {
     };
   }, [previewUrl]);
 
+  // Fetch roadmap data to populate the form
   const loadRoadmap = async () => {
-    let response = await fetch(`/api/teacher/roadmaps/edit/${params.id}`);
-    response = await response.json();
-    if (response.success) {
-      // Set form details
-      setFormDetails({
-        title: response.result.title,
-        subtitle: response.result.subtitle,
-        description: response.result.description,
-      });
-      setFormResources({
-        contentType: response.result.contentType,
-        uploadTitle: response.result.uploadTitle,
-        uploadDescription: response.result.uploadDescription,
-        file: response.result.file || null, // existing Cloudinary URL
-      });
-      setFormSeo({
-        ppt: response.result.ppt,
-        seoDescription: response.result.seoDescription,
-      });
-      // Set preview URL from the existing image if available.
-      if (response.result.file) {
-        setPreviewUrl(response.result.file);
+    try {
+      const response = await fetch(`/api/teacher/roadmaps/edit/${params.id}`);
+      const data = await response.json();
+      if (data.success) {
+        setFormDetails({
+          title: data.result.title || "",
+          description: data.result.description || "",
+          file: null, // File starts as null; existing URL is handled via preview
+        });
+        if (data.result.file) {
+          setPreviewUrl(data.result.file); // Set existing Cloudinary URL as preview
+        }
+      } else {
+        toast.error("Failed to load roadmap data!");
       }
-    } else {
-      toast.error("Failed to load roadmap data!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error loading roadmap data!");
     }
   };
 
-  // Handle new file selection and preview generation.
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      setFormResources({
-        ...formResources,
-        file: selectedFile, // store the File object
-        contentType: selectedFile.type,
+    const file = e.target.files[0];
+    if (file) {
+      setFormDetails({
+        ...formDetails,
+        file: file,
       });
-      const url = URL.createObjectURL(selectedFile);
+      const url = URL.createObjectURL(file);
       setPreviewUrl(url);
     }
   };
 
-  // Upload the file to Cloudinary (using your unsigned preset).
+  // Upload file to Cloudinary and return URL and resource_type
   const uploadToCloudinary = async (file) => {
     const data = new FormData();
     data.append("file", file);
-    data.append("upload_preset", "nextjspreset"); // your unsigned preset
+    data.append("upload_preset", "nextjspreset");
 
     const res = await fetch(
       `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`,
@@ -99,20 +81,14 @@ const EditRoadmap = () => {
       }
     );
     const json = await res.json();
-    return json.secure_url;
+    return {
+      url: json.secure_url,
+      resource_type: json.resource_type, // Capture resource_type (e.g., "image")
+    };
   };
 
-  const handleEdit = async () => {
-    if (
-      !formDetails.title ||
-      !formDetails.subtitle ||
-      !formDetails.description ||
-      !formResources.contentType ||
-      !formResources.uploadTitle ||
-      !formResources.uploadDescription ||
-      !formSeo.ppt ||
-      !formSeo.seoDescription
-    ) {
+  const handleSubmit = async () => {
+    if (!formDetails.title || !formDetails.description) {
       setError(true);
       return;
     } else {
@@ -121,35 +97,34 @@ const EditRoadmap = () => {
 
     try {
       setLoading(true);
-      let fileUrl = "";
+      const teacherData = JSON.parse(localStorage.getItem("teacher"));
+      const teacher_id = teacherData?._id;
 
-      // If the file is a new File (instanceof File), upload it.
-      if (formResources.file instanceof File) {
-        fileUrl = await uploadToCloudinary(formResources.file);
-      } else if (typeof formResources.file === "string") {
-        // Use existing URL if no new file is chosen.
-        fileUrl = formResources.file;
+      // Upload file to Cloudinary if a new file is selected
+      let uploadResult = null;
+      if (formDetails.file) {
+        uploadResult = await uploadToCloudinary(formDetails.file);
       }
 
       const formData = new FormData();
       formData.append("title", formDetails.title);
-      formData.append("subtitle", formDetails.subtitle);
       formData.append("description", formDetails.description);
-      formData.append("contentType", formResources.contentType);
-      formData.append("uploadTitle", formResources.uploadTitle);
-      formData.append("uploadDescription", formResources.uploadDescription);
-      formData.append("ppt", formSeo.ppt);
-      formData.append("seoDescription", formSeo.seoDescription);
-      if (fileUrl) {
-        formData.append("file", fileUrl);
+      formData.append("teacher_id", teacher_id);
+      if (uploadResult) {
+        formData.append("file", uploadResult.url);
+        formData.append("resource_type", uploadResult.resource_type);
+      } else if (previewUrl && !formDetails.file) {
+        formData.append("file", previewUrl); // Preserve existing file URL if no new upload
+        formData.append("resource_type", "image"); // Assume existing file is an image
       }
 
-      let response = await fetch(`/api/teacher/roadmaps/edit/${params.id}`, {
+      const response = await fetch(`/api/teacher/roadmaps/edit/${params.id}`, {
         method: "PUT",
         body: formData,
       });
-      response = await response.json();
-      if (response.success) {
+      const data = await response.json();
+
+      if (data.success) {
         toast.success("Roadmap Updated Successfully!");
         router.push("/teacher/dashboard/roadmaps");
       } else {
@@ -157,7 +132,7 @@ const EditRoadmap = () => {
       }
     } catch (error) {
       console.error(error);
-      toast.error("Failed to update roadmap!");
+      toast.error("An error occurred while updating the roadmap");
     } finally {
       setLoading(false);
     }
@@ -171,9 +146,9 @@ const EditRoadmap = () => {
         </h1>
         <button
           className={`text-xs lg:text-sm xl:text-base 2xl:text-lg px-4 lg:px-6 xl:px-8 py-2 lg:py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 ${
-            loading && "opacity-50 cursor-not-allowed"
+            loading ? "opacity-50 cursor-not-allowed" : ""
           }`}
-          onClick={handleEdit}
+          onClick={handleSubmit}
           disabled={loading}
         >
           {loading ? (
@@ -188,354 +163,111 @@ const EditRoadmap = () => {
       </div>
 
       <div className="p-2 py-4">
-        <div className="flex gap-2 mb-6 border-b-[1px] border-gray-300">
-          <button
-            className={`px-4 py-2 rounded-lg ${
-              activeTab === "details"
-                ? "border-b-2 border-blue-500 text-blue-500 font-semibold text-sm lg:text-base xl:text-lg 2xl:text-xl"
-                : "text-gray-500 hover:text-gray-600 font-semibold text-sm lg:text-base xl:text-lg 2xl:text-xl"
-            }`}
-            onClick={() => setActiveTab("details")}
-          >
-            Details
-          </button>
-          <button
-            className={`px-4 py-2 rounded-lg ${
-              activeTab === "resources"
-                ? "border-b-2 border-blue-500 text-blue-500 font-semibold text-sm lg:text-base xl:text-lg 2xl:text-xl"
-                : "text-gray-500 hover:text-gray-600 font-semibold text-sm lg:text-base xl:text-lg 2xl:text-xl"
-            }`}
-            onClick={() => setActiveTab("resources")}
-          >
-            Resources
-          </button>
-          <button
-            className={`px-4 py-2 rounded-lg ${
-              activeTab === "seo"
-                ? "border-b-2 border-blue-500 text-blue-500 font-semibold text-sm lg:text-base xl:text-lg 2xl:text-xl"
-                : "text-gray-500 hover:text-gray-600 font-semibold text-sm lg:text-base xl:text-lg 2xl:text-xl"
-            }`}
-            onClick={() => setActiveTab("seo")}
-          >
-            SEO
-          </button>
-        </div>
-
         <div className="space-y-4">
-          {activeTab === "details" && (
-            <>
-              <div className="flex flex-col">
-                <h2 className="text-md lg:text-lg xl:text-xl 2xl:text-2xl font-semibold">
-                  Roadmap Details
-                </h2>
-                <p className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-500">
-                  Enter the details for the roadmap.
-                </p>
-              </div>
-
-              <div className="space-y-4 p-2">
-                <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
-                  <label
-                    className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-600"
-                    htmlFor="title"
-                  >
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter Roadmap Title"
-                    className="w-full text-sm lg:text-base xl:text-lg 2xl:text-xl rounded-lg focus:outline-none"
-                    value={formDetails.title}
-                    onChange={(e) =>
-                      setFormDetails({ ...formDetails, title: e.target.value })
-                    }
-                  />
-                </div>
-                {error && !formDetails.title && (
-                  <span className="text-red-500">Required</span>
-                )}
-
-                <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
-                  <label
-                    className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-600"
-                    htmlFor="subtitle"
-                  >
-                    Subtitle
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter Roadmap Subtitle"
-                    className="w-full text-sm lg:text-base xl:text-lg 2xl:text-xl rounded-lg focus:outline-none"
-                    value={formDetails.subtitle}
-                    onChange={(e) =>
-                      setFormDetails({
-                        ...formDetails,
-                        subtitle: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                {error && !formDetails.subtitle && (
-                  <span className="text-red-500">Required</span>
-                )}
-
-                <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
-                  <label
-                    className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-600"
-                    htmlFor="description"
-                  >
-                    Description
-                  </label>
-                  <textarea
-                    placeholder="Enter Roadmap Description"
-                    className="w-full text-sm lg:text-base xl:text-lg 2xl:text-xl rounded-lg focus:outline-none"
-                    value={formDetails.description}
-                    onChange={(e) =>
-                      setFormDetails({
-                        ...formDetails,
-                        description: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                {error && !formDetails.description && (
-                  <span className="text-red-500">Required</span>
-                )}
-              </div>
-            </>
+          <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
+            <label htmlFor="title" className="text-gray-600">
+              Title
+            </label>
+            <input
+              type="text"
+              placeholder="Enter Roadmap Title"
+              className="w-full rounded-lg focus:outline-none text-sm"
+              value={formDetails.title}
+              onChange={(e) =>
+                setFormDetails({ ...formDetails, title: e.target.value })
+              }
+            />
+          </div>
+          {error && !formDetails.title && (
+            <span className="text-red-500">Required</span>
           )}
 
-          {activeTab === "resources" && (
-            <>
-              <div className="flex flex-col">
-                <h2 className="text-md lg:text-lg xl:text-xl 2xl:text-2xl font-semibold">
-                  Upload Notes
-                </h2>
-                <p className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-500">
-                  Enter the details for the roadmap.
+          <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
+            <label htmlFor="description" className="text-gray-600">
+              Description
+            </label>
+            <textarea
+              placeholder="Enter Roadmap Description"
+              className="w-full rounded-lg focus:outline-none text-sm"
+              value={formDetails.description}
+              onChange={(e) =>
+                setFormDetails({
+                  ...formDetails,
+                  description: e.target.value,
+                })
+              }
+            />
+          </div>
+          {error && !formDetails.description && (
+            <span className="text-red-500">Required</span>
+          )}
+
+          <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
+            <label className="text-gray-600 block mb-2">Upload Thumbnail</label>
+            <input
+              id="fileInput"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <label htmlFor="fileInput">
+              <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg hover:border-blue-500 transition-colors">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-12 w-12 text-gray-400 mb-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+                <p className="text-gray-600">
+                  Drag and drop files here or{" "}
+                  <span className="text-blue-600 font-medium">browse</span>
+                </p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Supported formats: JPG, PNG, GIF
                 </p>
               </div>
-
-              <div className="space-y-4 p-2">
-                <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
-                  <label
-                    className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-600"
-                    htmlFor="contentType"
+            </label>
+            {previewUrl && (
+              <div className="relative mt-4 w-full max-w-xs">
+                <button
+                  onClick={() => {
+                    setPreviewUrl(null);
+                    setFormDetails({ ...formDetails, file: null });
+                  }}
+                  className="absolute top-1 right-1 bg-gray-200 rounded-full p-1 hover:bg-gray-300 z-10"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
                   >
-                    Content Type
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter Content Type"
-                    className="w-full text-sm lg:text-base xl:text-lg 2xl:text-xl rounded-lg focus:outline-none"
-                    value={formResources.contentType}
-                    onChange={(e) =>
-                      setFormResources({
-                        ...formResources,
-                        contentType: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                {error && !formResources.contentType && (
-                  <span className="text-red-500">Required</span>
-                )}
-
-                <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
-                  <label
-                    className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-600"
-                    htmlFor="uploadTitle"
-                  >
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter Content Title"
-                    className="w-full text-sm lg:text-base xl:text-lg 2xl:text-xl rounded-lg focus:outline-none"
-                    value={formResources.uploadTitle}
-                    onChange={(e) =>
-                      setFormResources({
-                        ...formResources,
-                        uploadTitle: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                {error && !formResources.uploadTitle && (
-                  <span className="text-red-500">Required</span>
-                )}
-
-                <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
-                  <label
-                    className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-600"
-                    htmlFor="uploadDescription"
-                  >
-                    Description
-                  </label>
-                  <textarea
-                    placeholder="Enter Content Description"
-                    className="w-full text-sm lg:text-base xl:text-lg 2xl:text-xl rounded-lg focus:outline-none"
-                    value={formResources.uploadDescription}
-                    onChange={(e) =>
-                      setFormResources({
-                        ...formResources,
-                        uploadDescription: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                {error && !formResources.uploadDescription && (
-                  <span className="text-red-500">Required</span>
-                )}
-
-                <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
-                  <label
-                    className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-600 block mb-2"
-                    htmlFor="file"
-                  >
-                    Upload File
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="file"
-                      id="file"
-                      name="file"
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      accept="image/*"
-                      onChange={handleFileChange}
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
                     />
-                    <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg hover:border-blue-500 transition-colors">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-12 w-12 text-gray-400 mb-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                        />
-                      </svg>
-                      <p className="text-gray-600">
-                        Drag and drop files here or{" "}
-                        <span className="text-blue-600 font-medium">
-                          browse
-                        </span>
-                      </p>
-                      <p className="text-sm text-gray-500 mt-2">
-                        Supported formats: PDF, DOC, PPT
-                      </p>
-                    </div>
-                    {formResources.file &&
-                      typeof formResources.file !== "string" && (
-                        <p className="mt-2 text-sm text-gray-600">
-                          Selected file: {formResources.file.name}
-                        </p>
-                      )}
-                  </div>
-
-                  {/* Preview container */}
-                  {previewUrl && (
-                    <div className="relative mt-4 w-full max-w-xs">
-                      <button
-                        onClick={() => {
-                          setPreviewUrl(null);
-                          setFormResources({ ...formResources, file: null });
-                        }}
-                        className="absolute top-1 right-1 bg-gray-200 rounded-full p-1 hover:bg-gray-300 z-10"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
-                      <img
-                        src={previewUrl}
-                        alt="Preview"
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    </div>
-                  )}
-                </div>
+                  </svg>
+                </button>
+                <img
+                  src={previewUrl}
+                  alt="Preview"
+                  className="w-full h-full object-cover rounded-lg"
+                />
               </div>
-            </>
-          )}
-
-          {activeTab === "seo" && (
-            <>
-              <div className="flex flex-col">
-                <h2 className="text-md lg:text-lg xl:text-xl 2xl:text-2xl font-semibold">
-                  SEO
-                </h2>
-                <p className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-500">
-                  Enter the details for the roadmap.
-                </p>
-              </div>
-
-              <div className="space-y-4 p-2">
-                <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
-                  <label
-                    className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-600"
-                    htmlFor="ppt"
-                  >
-                    PPT Title
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter PPT Title"
-                    className="w-full text-sm lg:text-base xl:text-lg 2xl:text-xl rounded-lg focus:outline-none"
-                    value={formSeo.ppt}
-                    onChange={(e) =>
-                      setFormSeo({
-                        ...formSeo,
-                        ppt: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                {error && !formSeo.ppt && (
-                  <span className="text-red-500">Required</span>
-                )}
-
-                <div className="border-[1px] border-gray-300 rounded-lg p-2 max-w-[800px]">
-                  <label
-                    className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-600"
-                    htmlFor="seoDescription"
-                  >
-                    Description
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter PPT Description"
-                    className="w-full text-sm lg:text-base xl:text-lg 2xl:text-xl rounded-lg focus:outline-none"
-                    value={formSeo.seoDescription}
-                    onChange={(e) =>
-                      setFormSeo({
-                        ...formSeo,
-                        seoDescription: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                {error && !formSeo.seoDescription && (
-                  <span className="text-red-500">Required</span>
-                )}
-              </div>
-            </>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

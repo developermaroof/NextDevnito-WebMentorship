@@ -6,29 +6,18 @@ import { NextResponse } from "next/server";
 export async function POST(req) {
   const formData = await req.formData();
   const title = formData.get("title");
-  const subtitle = formData.get("subtitle");
   const description = formData.get("description");
-  const contentType = formData.get("contentType");
-  const uploadTitle = formData.get("uploadTitle");
-  const uploadDescription = formData.get("uploadDescription");
-  const ppt = formData.get("ppt");
-  const seoDescription = formData.get("seoDescription");
   const teacher_id = formData.get("teacher_id");
-
-  // Here, file is expected to be a Cloudinary URL string.
   const fileValue = formData.get("file") || "";
+  // Get resource_type from form data
+  const resource_type = formData.get("resource_type") || "";
 
   const payload = {
     title,
-    subtitle,
     description,
-    contentType,
-    uploadTitle,
-    uploadDescription,
-    ppt,
-    seoDescription,
     teacher_id,
     file: fileValue,
+    resource_type, // Store resource_type in the database
   };
 
   await mongoose.connect(connectionString);

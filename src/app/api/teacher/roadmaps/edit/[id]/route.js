@@ -5,41 +5,30 @@ import { NextResponse } from "next/server";
 
 export async function PUT(req, context) {
   try {
-    const { id } = await context.params;
+    await mongoose.connect(connectionString);
+    const { id } = context.params;
     const formData = await req.formData();
 
-    const title = formData.get("title");
-    const subtitle = formData.get("subtitle");
-    const description = formData.get("description");
-    const contentType = formData.get("contentType");
-    const uploadTitle = formData.get("uploadTitle");
-    const uploadDescription = formData.get("uploadDescription");
-    const ppt = formData.get("ppt");
-    const seoDescription = formData.get("seoDescription");
-
-    // Expect file to be a Cloudinary URL string
-    const fileValue = formData.get("file") || "";
-
     const payload = {
-      title,
-      subtitle,
-      description,
-      contentType,
-      uploadTitle,
-      uploadDescription,
-      ppt,
-      seoDescription,
+      title: formData.get("title") || "",
+      description: formData.get("description") || "",
+      teacher_id: formData.get("teacher_id") || "",
+      file: formData.get("file") || "",
+      resource_type: formData.get("resource_type") || "",
     };
-    if (fileValue) {
-      payload.file = fileValue;
-    }
 
-    await mongoose.connect(connectionString);
     const result = await roadmapSchema.findOneAndUpdate({ _id: id }, payload, {
       new: true,
     });
-    const success = !!result;
-    return NextResponse.json({ result, success });
+
+    if (!result) {
+      return NextResponse.json(
+        { success: false, error: "Roadmap not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ result, success: true });
   } catch (err) {
     console.error(err);
     return NextResponse.json(
@@ -50,13 +39,24 @@ export async function PUT(req, context) {
 }
 
 export async function GET(req, context) {
-  const { id } = await context.params;
-  let result;
-  let success = false;
-  await mongoose.connect(connectionString);
-  result = await roadmapSchema.findOne({ _id: id });
-  if (result) {
-    success = true;
+  try {
+    await mongoose.connect(connectionString);
+    const { id } = context.params;
+    const result = await roadmapSchema.findOne({ _id: id });
+
+    if (!result) {
+      return NextResponse.json(
+        { success: false, error: "Roadmap not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ result, success: true });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json(
+      { error: err.message, success: false },
+      { status: 500 }
+    );
   }
-  return NextResponse.json({ result, success });
 }

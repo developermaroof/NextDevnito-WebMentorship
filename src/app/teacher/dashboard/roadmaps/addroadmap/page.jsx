@@ -8,14 +8,8 @@ const AddRoadmap = () => {
   const [mounted, setMounted] = useState(false);
   const [formDetails, setFormDetails] = useState({
     title: "",
-    subtitle: "",
     description: "",
-    contentType: "",
-    uploadTitle: "",
-    uploadDescription: "",
     file: null,
-    ppt: "",
-    seoDescription: "",
   });
   const [error, setError] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -31,25 +25,23 @@ const AddRoadmap = () => {
     };
   }, [previewUrl]);
 
-  // Handle file selection and generate preview
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setFormDetails({
         ...formDetails,
         file: file,
-        contentType: file.type,
       });
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
     }
   };
 
-  // Upload the file to Cloudinary using your unsigned preset
+  // Modified to return both URL and resource_type from Cloudinary
   const uploadToCloudinary = async (file) => {
     const data = new FormData();
     data.append("file", file);
-    data.append("upload_preset", "nextjspreset"); // Use your unsigned preset
+    data.append("upload_preset", "nextjspreset");
 
     const res = await fetch(
       `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`,
@@ -59,21 +51,14 @@ const AddRoadmap = () => {
       }
     );
     const json = await res.json();
-    return json.secure_url;
+    return {
+      url: json.secure_url,
+      resource_type: json.resource_type, // Capture resource_type (e.g., "image")
+    };
   };
 
   const handleSubmit = async () => {
-    // Validate required fields
-    if (
-      !formDetails.title ||
-      !formDetails.subtitle ||
-      !formDetails.description ||
-      !formDetails.contentType ||
-      !formDetails.uploadTitle ||
-      !formDetails.uploadDescription ||
-      !formDetails.ppt ||
-      !formDetails.seoDescription
-    ) {
+    if (!formDetails.title || !formDetails.description) {
       setError(true);
       return;
     } else {
@@ -85,25 +70,19 @@ const AddRoadmap = () => {
       const teacherData = JSON.parse(localStorage.getItem("teacher"));
       const teacher_id = teacherData?._id;
 
-      // Upload file to Cloudinary only on submit
-      let cloudinaryUrl = "";
+      // Upload file to Cloudinary and get URL and resource_type
+      let uploadResult = null;
       if (formDetails.file) {
-        cloudinaryUrl = await uploadToCloudinary(formDetails.file);
+        uploadResult = await uploadToCloudinary(formDetails.file);
       }
 
-      // Build form data to send to API
       const formData = new FormData();
       formData.append("title", formDetails.title);
-      formData.append("subtitle", formDetails.subtitle);
       formData.append("description", formDetails.description);
-      formData.append("contentType", formDetails.contentType);
-      formData.append("uploadTitle", formDetails.uploadTitle);
-      formData.append("uploadDescription", formDetails.uploadDescription);
-      formData.append("ppt", formDetails.ppt);
-      formData.append("seoDescription", formDetails.seoDescription);
       formData.append("teacher_id", teacher_id);
-      if (cloudinaryUrl) {
-        formData.append("file", cloudinaryUrl);
+      if (uploadResult) {
+        formData.append("file", uploadResult.url);
+        formData.append("resource_type", uploadResult.resource_type); // Send resource_type to API
       }
 
       let response = await fetch("/api/teacher/roadmaps", {
@@ -169,26 +148,7 @@ const AddRoadmap = () => {
           {error && !formDetails.title && (
             <span className="text-red-500">Required</span>
           )}
-          <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
-            <label htmlFor="subtitle" className="text-gray-600">
-              Subtitle
-            </label>
-            <input
-              type="text"
-              placeholder="Enter Roadmap Subtitle"
-              className="w-full rounded-lg focus:outline-none text-sm"
-              value={formDetails.subtitle}
-              onChange={(e) =>
-                setFormDetails({
-                  ...formDetails,
-                  subtitle: e.target.value,
-                })
-              }
-            />
-          </div>
-          {error && !formDetails.subtitle && (
-            <span className="text-red-500">Required</span>
-          )}
+
           <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
             <label htmlFor="description" className="text-gray-600">
               Description
@@ -210,73 +170,11 @@ const AddRoadmap = () => {
           )}
 
           <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
-            <label htmlFor="contentType" className="text-gray-600">
-              Content Type
-            </label>
-            <input
-              type="text"
-              placeholder="Enter Content Type"
-              className="w-full rounded-lg focus:outline-none text-sm"
-              value={formDetails.contentType}
-              onChange={(e) =>
-                setFormDetails({
-                  ...formDetails,
-                  contentType: e.target.value,
-                })
-              }
-            />
-          </div>
-          {error && !formDetails.contentType && (
-            <span className="text-red-500">Required</span>
-          )}
-          <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
-            <label htmlFor="uploadTitle" className="text-gray-600">
-              Title
-            </label>
-            <input
-              type="text"
-              placeholder="Enter Content Title"
-              className="w-full rounded-lg focus:outline-none text-sm"
-              value={formDetails.uploadTitle}
-              onChange={(e) =>
-                setFormDetails({
-                  ...formDetails,
-                  uploadTitle: e.target.value,
-                })
-              }
-            />
-          </div>
-          {error && !formDetails.uploadTitle && (
-            <span className="text-red-500">Required</span>
-          )}
-          <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
-            <label htmlFor="uploadDescription" className="text-gray-600">
-              Description
-            </label>
-            <textarea
-              placeholder="Enter Content Description"
-              className="w-full rounded-lg focus:outline-none text-sm"
-              value={formDetails.uploadDescription}
-              onChange={(e) =>
-                setFormDetails({
-                  ...formDetails,
-                  uploadDescription: e.target.value,
-                })
-              }
-            />
-          </div>
-          {error && !formDetails.uploadDescription && (
-            <span className="text-red-500">Required</span>
-          )}
-
-          {/* File input using your original styled container */}
-          <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
-            <label className="text-gray-600 block mb-2">Upload Image</label>
-            {/* Hidden file input */}
+            <label className="text-gray-600 block mb-2">Upload Thumbnail</label>
             <input
               id="fileInput"
               type="file"
-              accept="image/*"
+              accept="image/*" // Restrict to images only
               onChange={handleFileChange}
               className="hidden"
             />
@@ -300,12 +198,12 @@ const AddRoadmap = () => {
                   Drag and drop files here or{" "}
                   <span className="text-blue-600 font-medium">browse</span>
                 </p>
+                {/* Updated to reflect images only */}
                 <p className="text-sm text-gray-500 mt-2">
-                  Supported formats: PDF, DOC, PPT
+                  Supported formats: JPG, PNG, GIF
                 </p>
               </div>
             </label>
-            {/* Preview container */}
             {previewUrl && (
               <div className="relative mt-4 w-full max-w-xs">
                 <button
@@ -338,44 +236,6 @@ const AddRoadmap = () => {
               </div>
             )}
           </div>
-
-          <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
-            <label htmlFor="ppt" className="text-gray-600">
-              PPT Title
-            </label>
-            <input
-              type="text"
-              placeholder="Enter PPT Title"
-              className="w-full rounded-lg focus:outline-none text-sm"
-              value={formDetails.ppt}
-              onChange={(e) =>
-                setFormDetails({ ...formDetails, ppt: e.target.value })
-              }
-            />
-          </div>
-          {error && !formDetails.ppt && (
-            <span className="text-red-500">Required</span>
-          )}
-          <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
-            <label htmlFor="seoDescription" className="text-gray-600">
-              Description
-            </label>
-            <input
-              type="text"
-              placeholder="Enter PPT Description"
-              className="w-full rounded-lg focus:outline-none text-sm"
-              value={formDetails.seoDescription}
-              onChange={(e) =>
-                setFormDetails({
-                  ...formDetails,
-                  seoDescription: e.target.value,
-                })
-              }
-            />
-          </div>
-          {error && !formDetails.seoDescription && (
-            <span className="text-red-500">Required</span>
-          )}
         </div>
       </div>
     </div>
