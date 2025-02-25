@@ -4,7 +4,7 @@ import { useRouter, useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-const EditCourse = () => {
+const EditRoadmap = () => {
   const params = useParams();
   const router = useRouter();
 
@@ -28,9 +28,9 @@ const EditCourse = () => {
   const [previewUrl, setPreviewUrl] = useState(null); // State for image preview
   const [loading, setLoading] = useState(false);
 
-  // On mount, load the course data.
+  // On mount, load the roadmap data.
   useEffect(() => {
-    loadCourse();
+    loadRoadmap();
   }, []);
 
   // Clean up object URL when preview changes/unmounts.
@@ -42,8 +42,8 @@ const EditCourse = () => {
     };
   }, [previewUrl]);
 
-  const loadCourse = async () => {
-    let response = await fetch(`/api/teacher/courses/edit/${params.id}`);
+  const loadRoadmap = async () => {
+    let response = await fetch(`/api/teacher/roadmaps/edit/${params.id}`);
     response = await response.json();
     if (response.success) {
       // Set form details
@@ -67,7 +67,7 @@ const EditCourse = () => {
         setPreviewUrl(response.result.file);
       }
     } else {
-      toast.error("Failed to load course data!");
+      toast.error("Failed to load roadmap data!");
     }
   };
 
@@ -144,20 +144,20 @@ const EditCourse = () => {
         formData.append("file", fileUrl);
       }
 
-      let response = await fetch(`/api/teacher/courses/edit/${params.id}`, {
+      let response = await fetch(`/api/teacher/roadmaps/edit/${params.id}`, {
         method: "PUT",
         body: formData,
       });
       response = await response.json();
       if (response.success) {
-        toast.success("Course Updated Successfully!");
-        router.push("/teacher/dashboard/courses");
+        toast.success("Roadmap Updated Successfully!");
+        router.push("/teacher/dashboard/roadmaps");
       } else {
-        toast.error("Failed to update course!");
+        toast.error("Failed to update roadmap!");
       }
     } catch (error) {
       console.error(error);
-      toast.error("Failed to update course!");
+      toast.error("Failed to update roadmap!");
     } finally {
       setLoading(false);
     }
@@ -167,7 +167,7 @@ const EditCourse = () => {
     <div>
       <div className="flex justify-between items-center p-2 py-4">
         <h1 className="text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl font-bold">
-          Edit Course
+          Edit Roadmap
         </h1>
         <button
           className={`text-xs lg:text-sm xl:text-base 2xl:text-lg px-4 lg:px-6 xl:px-8 py-2 lg:py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 ${
@@ -226,10 +226,10 @@ const EditCourse = () => {
             <>
               <div className="flex flex-col">
                 <h2 className="text-md lg:text-lg xl:text-xl 2xl:text-2xl font-semibold">
-                  Course Details
+                  Roadmap Details
                 </h2>
                 <p className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-500">
-                  Enter the details for the course.
+                  Enter the details for the roadmap.
                 </p>
               </div>
 
@@ -243,7 +243,7 @@ const EditCourse = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="Enter Course Title"
+                    placeholder="Enter Roadmap Title"
                     className="w-full text-sm lg:text-base xl:text-lg 2xl:text-xl rounded-lg focus:outline-none"
                     value={formDetails.title}
                     onChange={(e) =>
@@ -264,7 +264,7 @@ const EditCourse = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="Enter Course Subtitle"
+                    placeholder="Enter Roadmap Subtitle"
                     className="w-full text-sm lg:text-base xl:text-lg 2xl:text-xl rounded-lg focus:outline-none"
                     value={formDetails.subtitle}
                     onChange={(e) =>
@@ -287,7 +287,7 @@ const EditCourse = () => {
                     Description
                   </label>
                   <textarea
-                    placeholder="Enter Course Description"
+                    placeholder="Enter Roadmap Description"
                     className="w-full text-sm lg:text-base xl:text-lg 2xl:text-xl rounded-lg focus:outline-none"
                     value={formDetails.description}
                     onChange={(e) =>
@@ -312,7 +312,7 @@ const EditCourse = () => {
                   Upload Notes
                 </h2>
                 <p className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-500">
-                  Enter the details for the course.
+                  Enter the details for the roadmap.
                 </p>
               </div>
 
@@ -481,7 +481,7 @@ const EditCourse = () => {
                   SEO
                 </h2>
                 <p className="text-sm lg:text-base xl:text-lg 2xl:text-xl text-gray-500">
-                  Enter the details for the course.
+                  Enter the details for the roadmap.
                 </p>
               </div>
 
@@ -542,4 +542,4 @@ const EditCourse = () => {
   );
 };
 
-export default EditCourse;
+export default EditRoadmap;

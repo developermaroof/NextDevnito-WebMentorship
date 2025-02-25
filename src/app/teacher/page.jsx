@@ -11,10 +11,10 @@ const Teacher = () => {
 
   useEffect(() => {
     const data = localStorage.getItem("teacher");
-    if (!data && pathname === "/teacher/dashboard") {
+    if (!data && pathname === "/teacher/dashboard/roadmaps") {
       router.push("/teacher");
     } else if (data && pathname === "/teacher") {
-      router.push("/teacher/dashboard");
+      router.push("/teacher/dashboard/roadmaps");
     }
   }, [pathname, router]);
 

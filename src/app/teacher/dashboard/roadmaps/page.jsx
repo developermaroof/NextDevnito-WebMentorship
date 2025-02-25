@@ -5,50 +5,50 @@ import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { useRouter } from "next/navigation";
 
-const Courses = () => {
-  const [courses, setCourses] = useState();
+const Roadmaps = () => {
+  const [roadmaps, setRoadmaps] = useState();
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    loadCourses();
+    loadRoadmaps();
   }, []);
 
-  const loadCourses = async () => {
+  const loadRoadmaps = async () => {
     const teacherData = JSON.parse(localStorage.getItem("teacher"));
     const teacher_id = teacherData._id;
-    let response = await fetch(`/api/teacher/courses/${teacher_id}`);
+    let response = await fetch(`/api/teacher/roadmaps/${teacher_id}`);
     response = await response.json();
     if (response.success) {
-      setCourses(response.result);
+      setRoadmaps(response.result);
     } else {
-      toast.error("Failed to load courses!");
+      toast.error("Failed to load roadmaps!");
     }
   };
 
-  const handleDeleteCourse = async (id) => {
+  const handleDeleteRoadmap = async (id) => {
     try {
       setLoading(true);
-      let response = await fetch(`/api/teacher/courses/${id}`, {
+      let response = await fetch(`/api/teacher/roadmaps/${id}`, {
         method: "DELETE",
       });
       response = await response.json();
       if (response.success) {
-        toast.success("Course Deleted Successfully!");
-        loadCourses();
+        toast.success("Roadmap Deleted Successfully!");
+        loadRoadmaps();
       } else {
-        toast.error("Failed to delete course!");
+        toast.error("Failed to delete roadmap!");
       }
     } catch (error) {
-      toast.error("Failed to delete course!");
+      toast.error("Failed to delete roadmap!");
     } finally {
       setLoading(false);
     }
   };
 
   const handleNavigate = () => {
-    router.push("/teacher/dashboard/courses/addcourse");
+    router.push("/teacher/dashboard/roadmaps/addroadmap");
   };
 
   const handleMenuToggle = (index) => {
@@ -59,14 +59,14 @@ const Courses = () => {
     <div>
       <div className="flex justify-between items-center p-4">
         <h1 className="text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl font-bold">
-          Courses
+          Roadmaps
         </h1>
         <div className="flex items-center gap-2">
           <button
             onClick={handleNavigate}
             className="text-xs lg:text-sm xl:text-base 2xl:text-lg px-3 lg:px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
           >
-            Add Course
+            Add Roadmap
           </button>
           <button className="p-2 hover:bg-gray-100 rounded-full">
             <svg
@@ -94,9 +94,9 @@ const Courses = () => {
       </div>
 
       <div className="flex flex-wrap gap-4">
-        {courses ? (
-          courses.length > 0 ? (
-            courses.map((item, index) => (
+        {roadmaps ? (
+          roadmaps.length > 0 ? (
+            roadmaps.map((item, index) => (
               <div key={index} className="relative border p-4 max-w-[300px]">
                 <div className="flex justify-between">
                   <div>
@@ -129,13 +129,13 @@ const Courses = () => {
                         />
                       </svg>
                     </button>
-                    {/* Dropdown menu appears only for the course whose index matches openMenuIndex */}
+                    {/* Dropdown menu appears only for the roadmaps whose index matches openMenuIndex */}
                     {openMenuIndex === index && (
                       <div className="absolute right-0 mt-2 bg-white border rounded shadow z-10">
                         <button
                           onClick={() =>
                             router.push(
-                              `/teacher/dashboard/courses/${item._id}`
+                              `/teacher/dashboard/roadmaps/${item._id}`
                             )
                           }
                           className="w-full text-left px-4 py-2 text-sm text-blue-500 hover:bg-gray-100"
@@ -143,7 +143,7 @@ const Courses = () => {
                           Edit
                         </button>
                         <button
-                          onClick={() => handleDeleteCourse(item._id)}
+                          onClick={() => handleDeleteRoadmap(item._id)}
                           className={`w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100 ${
                             loading && "opacity-50 cursor-not-allowed"
                           }`}
@@ -168,7 +168,7 @@ const Courses = () => {
                     item.contentType.startsWith("image") ? (
                       <img
                         src={item.file} // Use the Cloudinary URL directly
-                        alt={item.uploadTitle || "Course File"}
+                        alt={item.uploadTitle || "Roadmap File"}
                         className="w-full h-auto object-cover rounded"
                       />
                     ) : (
@@ -187,9 +187,9 @@ const Courses = () => {
             ))
           ) : (
             <div className="w-full text-center text-lg font-medium p-8">
-              No courses found.
+              No roadmaps found.
             </div>
-          ) // Show 5 skeleton loaders while courses are undefined
+          ) // Show 5 skeleton loaders while roadmaps are undefined
         ) : (
           Array.from({ length: 5 }).map((_, index) => (
             <div key={index} className="border p-4 max-w-[300px]">
@@ -205,4 +205,4 @@ const Courses = () => {
   );
 };
 
-export default Courses;
+export default Roadmaps;

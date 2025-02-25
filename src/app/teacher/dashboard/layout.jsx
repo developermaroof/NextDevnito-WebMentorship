@@ -47,23 +47,27 @@ export default function DashboardLayout({ children }) {
   };
 
   const navigation = [
-    { name: "Dashboard", href: "/teacher/dashboard", icon: ChartPieIcon },
-    { name: "Courses", href: "/teacher/dashboard/courses", icon: BookOpenIcon },
+    // { name: "Dashboard", href: "/teacher/dashboard", icon: ChartPieIcon },
     {
-      name: "communication",
-      href: "/teacher/dashboard/communication",
-      icon: ChatBubbleLeftIcon,
+      name: "Roadmaps",
+      href: "/teacher/dashboard/roadmaps",
+      icon: BookOpenIcon,
     },
-    {
-      name: "Revenue",
-      href: "/teacher/dashboard/revenue",
-      icon: CurrencyDollarIcon,
-    },
-    {
-      name: "Setting",
-      href: "/teacher/dashboard/setting",
-      icon: Cog6ToothIcon,
-    },
+    // {
+    //   name: "communication",
+    //   href: "/teacher/dashboard/communication",
+    //   icon: ChatBubbleLeftIcon,
+    // },
+    // {
+    //   name: "Revenue",
+    //   href: "/teacher/dashboard/revenue",
+    //   icon: CurrencyDollarIcon,
+    // },
+    // {
+    //   name: "Setting",
+    //   href: "/teacher/dashboard/setting",
+    //   icon: Cog6ToothIcon,
+    // },
   ];
 
   return (

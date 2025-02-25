@@ -1,5 +1,5 @@
 import { connectionString } from "@/utils/db";
-import { courseSchema } from "@/utils/models/courseModel";
+import { roadmapSchema } from "@/utils/models/roadmapModel";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
@@ -35,7 +35,7 @@ export async function PUT(req, context) {
     }
 
     await mongoose.connect(connectionString);
-    const result = await courseSchema.findOneAndUpdate({ _id: id }, payload, {
+    const result = await roadmapSchema.findOneAndUpdate({ _id: id }, payload, {
       new: true,
     });
     const success = !!result;
@@ -54,7 +54,7 @@ export async function GET(req, context) {
   let result;
   let success = false;
   await mongoose.connect(connectionString);
-  result = await courseSchema.findOne({ _id: id });
+  result = await roadmapSchema.findOne({ _id: id });
   if (result) {
     success = true;
   }

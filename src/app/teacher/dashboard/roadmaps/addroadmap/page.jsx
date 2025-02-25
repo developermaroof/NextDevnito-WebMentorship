@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 
-const AddCourse = () => {
+const AddRoadmap = () => {
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState("details");
   const [formDetails, setFormDetails] = useState({
@@ -111,17 +111,17 @@ const AddCourse = () => {
         formData.append("file", cloudinaryUrl);
       }
 
-      let response = await fetch("/api/teacher/courses", {
+      let response = await fetch("/api/teacher/roadmaps", {
         method: "POST",
         body: formData,
       });
       response = await response.json();
 
       if (response.success) {
-        toast.success("Course Created Successfully!");
-        router.push("/teacher/dashboard/courses");
+        toast.success("Roadmap Created Successfully!");
+        router.push("/teacher/dashboard/roadmaps");
       } else {
-        toast.error("Failed to create course!");
+        toast.error("Failed to create roadmap!");
       }
     } catch (error) {
       console.error(error);
@@ -135,7 +135,7 @@ const AddCourse = () => {
     <div>
       <div className="flex justify-between items-center p-2 py-4">
         <h1 className="text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl font-bold">
-          Add Course
+          Add Roadmap
         </h1>
         <button
           className={`text-xs lg:text-sm xl:text-base 2xl:text-lg px-4 lg:px-6 xl:px-8 py-2 lg:py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 ${
@@ -193,9 +193,9 @@ const AddCourse = () => {
           {activeTab === "details" && (
             <>
               <div className="flex flex-col">
-                <h2 className="font-semibold">Course Details</h2>
+                <h2 className="font-semibold">Roadmap Details</h2>
                 <p className="text-gray-500">
-                  Enter the details for the course.
+                  Enter the details for the roadmap.
                 </p>
               </div>
               <div className="space-y-4 p-2">
@@ -205,7 +205,7 @@ const AddCourse = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="Enter Course Title"
+                    placeholder="Enter Roadmap Title"
                     className="w-full rounded-lg focus:outline-none text-sm"
                     value={formDetails.title}
                     onChange={(e) =>
@@ -222,7 +222,7 @@ const AddCourse = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="Enter Course Subtitle"
+                    placeholder="Enter Roadmap Subtitle"
                     className="w-full rounded-lg focus:outline-none text-sm"
                     value={formDetails.subtitle}
                     onChange={(e) =>
@@ -241,7 +241,7 @@ const AddCourse = () => {
                     Description
                   </label>
                   <textarea
-                    placeholder="Enter Course Description"
+                    placeholder="Enter Roadmap Description"
                     className="w-full rounded-lg focus:outline-none text-sm"
                     value={formDetails.description}
                     onChange={(e) =>
@@ -264,7 +264,7 @@ const AddCourse = () => {
               <div className="flex flex-col">
                 <h2 className="font-semibold">Upload Notes</h2>
                 <p className="text-gray-500">
-                  Enter the details for the course.
+                  Enter the details for the roadmap.
                 </p>
               </div>
               <div className="space-y-4 p-2">
@@ -410,7 +410,7 @@ const AddCourse = () => {
               <div className="flex flex-col">
                 <h2 className="font-semibold">SEO</h2>
                 <p className="text-gray-500">
-                  Enter the details for the course.
+                  Enter the details for the roadmap.
                 </p>
               </div>
               <div className="space-y-4 p-2">
@@ -457,4 +457,4 @@ const AddCourse = () => {
   );
 };
 
-export default AddCourse;
+export default AddRoadmap;

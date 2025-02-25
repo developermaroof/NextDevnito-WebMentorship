@@ -1,5 +1,5 @@
 import { connectionString } from "@/utils/db";
-import { courseSchema } from "@/utils/models/courseModel";
+import { roadmapSchema } from "@/utils/models/roadmapModel";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
@@ -8,7 +8,7 @@ export async function GET(req, context) {
   let result;
   let success = false;
   await mongoose.connect(connectionString);
-  result = await courseSchema.find({ teacher_id: id });
+  result = await roadmapSchema.find({ teacher_id: id });
   if (result) {
     success = true;
   }
@@ -21,7 +21,7 @@ export async function DELETE(req, context) {
   let result;
   let success = false;
   await mongoose.connect(connectionString);
-  result = await courseSchema.deleteOne({ _id: id });
+  result = await roadmapSchema.deleteOne({ _id: id });
   if (result.deletedCount > 0) {
     success = true;
   }

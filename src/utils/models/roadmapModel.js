@@ -1,6 +1,6 @@
 const { default: mongoose } = require("mongoose");
 
-const courseModel = new mongoose.Schema({
+const roadmapModel = new mongoose.Schema({
   title: String,
   subtitle: String,
   description: String,
@@ -13,5 +13,5 @@ const courseModel = new mongoose.Schema({
   teacher_id: mongoose.Schema.Types.ObjectId,
 });
 
-export const courseSchema =
-  mongoose.models.courses || mongoose.model("courses", courseModel);
+export const roadmapSchema =
+  mongoose.models.roadmaps || mongoose.model("roadmaps", roadmapModel);

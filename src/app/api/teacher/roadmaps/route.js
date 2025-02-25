@@ -1,5 +1,5 @@
 import { connectionString } from "@/utils/db";
-import { courseSchema } from "@/utils/models/courseModel";
+import { roadmapSchema } from "@/utils/models/roadmapModel";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
@@ -32,8 +32,8 @@ export async function POST(req) {
   };
 
   await mongoose.connect(connectionString);
-  const course = new courseSchema(payload);
-  const result = await course.save();
+  const roadmap = new roadmapSchema(payload);
+  const result = await roadmap.save();
   const success = !!result;
   return NextResponse.json({ result, success });
 }
