@@ -6,19 +6,14 @@ import { toast } from "react-toastify";
 
 const AddRoadmap = () => {
   const [mounted, setMounted] = useState(false);
-  const [activeTab, setActiveTab] = useState("details");
   const [formDetails, setFormDetails] = useState({
     title: "",
     subtitle: "",
     description: "",
-  });
-  const [formResources, setFormResources] = useState({
     contentType: "",
     uploadTitle: "",
     uploadDescription: "",
-    file: null, // will hold the File object initially
-  });
-  const [formSeo, setFormSeo] = useState({
+    file: null,
     ppt: "",
     seoDescription: "",
   });
@@ -40,8 +35,8 @@ const AddRoadmap = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormResources({
-        ...formResources,
+      setFormDetails({
+        ...formDetails,
         file: file,
         contentType: file.type,
       });
@@ -73,11 +68,11 @@ const AddRoadmap = () => {
       !formDetails.title ||
       !formDetails.subtitle ||
       !formDetails.description ||
-      !formResources.contentType ||
-      !formResources.uploadTitle ||
-      !formResources.uploadDescription ||
-      !formSeo.ppt ||
-      !formSeo.seoDescription
+      !formDetails.contentType ||
+      !formDetails.uploadTitle ||
+      !formDetails.uploadDescription ||
+      !formDetails.ppt ||
+      !formDetails.seoDescription
     ) {
       setError(true);
       return;
@@ -92,8 +87,8 @@ const AddRoadmap = () => {
 
       // Upload file to Cloudinary only on submit
       let cloudinaryUrl = "";
-      if (formResources.file) {
-        cloudinaryUrl = await uploadToCloudinary(formResources.file);
+      if (formDetails.file) {
+        cloudinaryUrl = await uploadToCloudinary(formDetails.file);
       }
 
       // Build form data to send to API
@@ -101,11 +96,11 @@ const AddRoadmap = () => {
       formData.append("title", formDetails.title);
       formData.append("subtitle", formDetails.subtitle);
       formData.append("description", formDetails.description);
-      formData.append("contentType", formResources.contentType);
-      formData.append("uploadTitle", formResources.uploadTitle);
-      formData.append("uploadDescription", formResources.uploadDescription);
-      formData.append("ppt", formSeo.ppt);
-      formData.append("seoDescription", formSeo.seoDescription);
+      formData.append("contentType", formDetails.contentType);
+      formData.append("uploadTitle", formDetails.uploadTitle);
+      formData.append("uploadDescription", formDetails.uploadDescription);
+      formData.append("ppt", formDetails.ppt);
+      formData.append("seoDescription", formDetails.seoDescription);
       formData.append("teacher_id", teacher_id);
       if (cloudinaryUrl) {
         formData.append("file", cloudinaryUrl);
@@ -156,300 +151,230 @@ const AddRoadmap = () => {
       </div>
 
       <div className="p-2 py-4">
-        <div className="flex gap-2 mb-6 border-b-[1px] border-gray-300">
-          <button
-            className={`px-4 py-2 rounded-lg ${
-              activeTab === "details"
-                ? "border-b-2 border-blue-500 text-blue-500 font-semibold"
-                : "text-gray-500 hover:text-gray-600 font-semibold"
-            }`}
-            onClick={() => setActiveTab("details")}
-          >
-            Details
-          </button>
-          <button
-            className={`px-4 py-2 rounded-lg ${
-              activeTab === "resources"
-                ? "border-b-2 border-blue-500 text-blue-500 font-semibold"
-                : "text-gray-500 hover:text-gray-600 font-semibold"
-            }`}
-            onClick={() => setActiveTab("resources")}
-          >
-            Resources
-          </button>
-          <button
-            className={`px-4 py-2 rounded-lg ${
-              activeTab === "seo"
-                ? "border-b-2 border-blue-500 text-blue-500 font-semibold"
-                : "text-gray-500 hover:text-gray-600 font-semibold"
-            }`}
-            onClick={() => setActiveTab("seo")}
-          >
-            SEO
-          </button>
-        </div>
-
         <div className="space-y-4">
-          {activeTab === "details" && (
-            <>
-              <div className="flex flex-col">
-                <h2 className="font-semibold">Roadmap Details</h2>
-                <p className="text-gray-500">
-                  Enter the details for the roadmap.
-                </p>
-              </div>
-              <div className="space-y-4 p-2">
-                <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
-                  <label htmlFor="title" className="text-gray-600">
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter Roadmap Title"
-                    className="w-full rounded-lg focus:outline-none text-sm"
-                    value={formDetails.title}
-                    onChange={(e) =>
-                      setFormDetails({ ...formDetails, title: e.target.value })
-                    }
-                  />
-                </div>
-                {error && !formDetails.title && (
-                  <span className="text-red-500">Required</span>
-                )}
-                <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
-                  <label htmlFor="subtitle" className="text-gray-600">
-                    Subtitle
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter Roadmap Subtitle"
-                    className="w-full rounded-lg focus:outline-none text-sm"
-                    value={formDetails.subtitle}
-                    onChange={(e) =>
-                      setFormDetails({
-                        ...formDetails,
-                        subtitle: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                {error && !formDetails.subtitle && (
-                  <span className="text-red-500">Required</span>
-                )}
-                <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
-                  <label htmlFor="description" className="text-gray-600">
-                    Description
-                  </label>
-                  <textarea
-                    placeholder="Enter Roadmap Description"
-                    className="w-full rounded-lg focus:outline-none text-sm"
-                    value={formDetails.description}
-                    onChange={(e) =>
-                      setFormDetails({
-                        ...formDetails,
-                        description: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                {error && !formDetails.description && (
-                  <span className="text-red-500">Required</span>
-                )}
-              </div>
-            </>
+          <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
+            <label htmlFor="title" className="text-gray-600">
+              Title
+            </label>
+            <input
+              type="text"
+              placeholder="Enter Roadmap Title"
+              className="w-full rounded-lg focus:outline-none text-sm"
+              value={formDetails.title}
+              onChange={(e) =>
+                setFormDetails({ ...formDetails, title: e.target.value })
+              }
+            />
+          </div>
+          {error && !formDetails.title && (
+            <span className="text-red-500">Required</span>
+          )}
+          <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
+            <label htmlFor="subtitle" className="text-gray-600">
+              Subtitle
+            </label>
+            <input
+              type="text"
+              placeholder="Enter Roadmap Subtitle"
+              className="w-full rounded-lg focus:outline-none text-sm"
+              value={formDetails.subtitle}
+              onChange={(e) =>
+                setFormDetails({
+                  ...formDetails,
+                  subtitle: e.target.value,
+                })
+              }
+            />
+          </div>
+          {error && !formDetails.subtitle && (
+            <span className="text-red-500">Required</span>
+          )}
+          <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
+            <label htmlFor="description" className="text-gray-600">
+              Description
+            </label>
+            <textarea
+              placeholder="Enter Roadmap Description"
+              className="w-full rounded-lg focus:outline-none text-sm"
+              value={formDetails.description}
+              onChange={(e) =>
+                setFormDetails({
+                  ...formDetails,
+                  description: e.target.value,
+                })
+              }
+            />
+          </div>
+          {error && !formDetails.description && (
+            <span className="text-red-500">Required</span>
           )}
 
-          {activeTab === "resources" && (
-            <>
-              <div className="flex flex-col">
-                <h2 className="font-semibold">Upload Notes</h2>
-                <p className="text-gray-500">
-                  Enter the details for the roadmap.
-                </p>
-              </div>
-              <div className="space-y-4 p-2">
-                <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
-                  <label htmlFor="contentType" className="text-gray-600">
-                    Content Type
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter Content Type"
-                    className="w-full rounded-lg focus:outline-none text-sm"
-                    value={formResources.contentType}
-                    onChange={(e) =>
-                      setFormResources({
-                        ...formResources,
-                        contentType: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                {error && !formResources.contentType && (
-                  <span className="text-red-500">Required</span>
-                )}
-                <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
-                  <label htmlFor="uploadTitle" className="text-gray-600">
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter Content Title"
-                    className="w-full rounded-lg focus:outline-none text-sm"
-                    value={formResources.uploadTitle}
-                    onChange={(e) =>
-                      setFormResources({
-                        ...formResources,
-                        uploadTitle: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                {error && !formResources.uploadTitle && (
-                  <span className="text-red-500">Required</span>
-                )}
-                <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
-                  <label htmlFor="uploadDescription" className="text-gray-600">
-                    Description
-                  </label>
-                  <textarea
-                    placeholder="Enter Content Description"
-                    className="w-full rounded-lg focus:outline-none text-sm"
-                    value={formResources.uploadDescription}
-                    onChange={(e) =>
-                      setFormResources({
-                        ...formResources,
-                        uploadDescription: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                {error && !formResources.uploadDescription && (
-                  <span className="text-red-500">Required</span>
-                )}
-
-                {/* File input using your original styled container */}
-                <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
-                  <label className="text-gray-600 block mb-2">
-                    Upload Image
-                  </label>
-                  {/* Hidden file input */}
-                  <input
-                    id="fileInput"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                  <label htmlFor="fileInput">
-                    <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg hover:border-blue-500 transition-colors">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-12 w-12 text-gray-400 mb-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                        />
-                      </svg>
-                      <p className="text-gray-600">
-                        Drag and drop files here or{" "}
-                        <span className="text-blue-600 font-medium">
-                          browse
-                        </span>
-                      </p>
-                      <p className="text-sm text-gray-500 mt-2">
-                        Supported formats: PDF, DOC, PPT
-                      </p>
-                    </div>
-                  </label>
-                  {/* Preview container */}
-                  {previewUrl && (
-                    <div className="relative mt-4 w-full max-w-xs">
-                      <button
-                        onClick={() => {
-                          setPreviewUrl(null);
-                          setFormResources({ ...formResources, file: null });
-                        }}
-                        className="absolute top-1 right-1 bg-gray-200 rounded-full p-1 hover:bg-gray-300 z-10"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
-                      <img
-                        src={previewUrl}
-                        alt="Preview"
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </>
+          <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
+            <label htmlFor="contentType" className="text-gray-600">
+              Content Type
+            </label>
+            <input
+              type="text"
+              placeholder="Enter Content Type"
+              className="w-full rounded-lg focus:outline-none text-sm"
+              value={formDetails.contentType}
+              onChange={(e) =>
+                setFormDetails({
+                  ...formDetails,
+                  contentType: e.target.value,
+                })
+              }
+            />
+          </div>
+          {error && !formDetails.contentType && (
+            <span className="text-red-500">Required</span>
+          )}
+          <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
+            <label htmlFor="uploadTitle" className="text-gray-600">
+              Title
+            </label>
+            <input
+              type="text"
+              placeholder="Enter Content Title"
+              className="w-full rounded-lg focus:outline-none text-sm"
+              value={formDetails.uploadTitle}
+              onChange={(e) =>
+                setFormDetails({
+                  ...formDetails,
+                  uploadTitle: e.target.value,
+                })
+              }
+            />
+          </div>
+          {error && !formDetails.uploadTitle && (
+            <span className="text-red-500">Required</span>
+          )}
+          <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
+            <label htmlFor="uploadDescription" className="text-gray-600">
+              Description
+            </label>
+            <textarea
+              placeholder="Enter Content Description"
+              className="w-full rounded-lg focus:outline-none text-sm"
+              value={formDetails.uploadDescription}
+              onChange={(e) =>
+                setFormDetails({
+                  ...formDetails,
+                  uploadDescription: e.target.value,
+                })
+              }
+            />
+          </div>
+          {error && !formDetails.uploadDescription && (
+            <span className="text-red-500">Required</span>
           )}
 
-          {activeTab === "seo" && (
-            <>
-              <div className="flex flex-col">
-                <h2 className="font-semibold">SEO</h2>
-                <p className="text-gray-500">
-                  Enter the details for the roadmap.
+          {/* File input using your original styled container */}
+          <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
+            <label className="text-gray-600 block mb-2">Upload Image</label>
+            {/* Hidden file input */}
+            <input
+              id="fileInput"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <label htmlFor="fileInput">
+              <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg hover:border-blue-500 transition-colors">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-12 w-12 text-gray-400 mb-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+                <p className="text-gray-600">
+                  Drag and drop files here or{" "}
+                  <span className="text-blue-600 font-medium">browse</span>
+                </p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Supported formats: PDF, DOC, PPT
                 </p>
               </div>
-              <div className="space-y-4 p-2">
-                <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
-                  <label htmlFor="ppt" className="text-gray-600">
-                    PPT Title
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter PPT Title"
-                    className="w-full rounded-lg focus:outline-none text-sm"
-                    value={formSeo.ppt}
-                    onChange={(e) =>
-                      setFormSeo({ ...formSeo, ppt: e.target.value })
-                    }
-                  />
-                </div>
-                {error && !formSeo.ppt && (
-                  <span className="text-red-500">Required</span>
-                )}
-                <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
-                  <label htmlFor="seoDescription" className="text-gray-600">
-                    Description
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter PPT Description"
-                    className="w-full rounded-lg focus:outline-none text-sm"
-                    value={formSeo.seoDescription}
-                    onChange={(e) =>
-                      setFormSeo({ ...formSeo, seoDescription: e.target.value })
-                    }
-                  />
-                </div>
-                {error && !formSeo.seoDescription && (
-                  <span className="text-red-500">Required</span>
-                )}
+            </label>
+            {/* Preview container */}
+            {previewUrl && (
+              <div className="relative mt-4 w-full max-w-xs">
+                <button
+                  onClick={() => {
+                    setPreviewUrl(null);
+                    setFormDetails({ ...formDetails, file: null });
+                  }}
+                  className="absolute top-1 right-1 bg-gray-200 rounded-full p-1 hover:bg-gray-300 z-10"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+                <img
+                  src={previewUrl}
+                  alt="Preview"
+                  className="w-full h-full object-cover rounded-lg"
+                />
               </div>
-            </>
+            )}
+          </div>
+
+          <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
+            <label htmlFor="ppt" className="text-gray-600">
+              PPT Title
+            </label>
+            <input
+              type="text"
+              placeholder="Enter PPT Title"
+              className="w-full rounded-lg focus:outline-none text-sm"
+              value={formDetails.ppt}
+              onChange={(e) =>
+                setFormDetails({ ...formDetails, ppt: e.target.value })
+              }
+            />
+          </div>
+          {error && !formDetails.ppt && (
+            <span className="text-red-500">Required</span>
+          )}
+          <div className="border border-gray-300 rounded-lg p-2 max-w-[800px]">
+            <label htmlFor="seoDescription" className="text-gray-600">
+              Description
+            </label>
+            <input
+              type="text"
+              placeholder="Enter PPT Description"
+              className="w-full rounded-lg focus:outline-none text-sm"
+              value={formDetails.seoDescription}
+              onChange={(e) =>
+                setFormDetails({
+                  ...formDetails,
+                  seoDescription: e.target.value,
+                })
+              }
+            />
+          </div>
+          {error && !formDetails.seoDescription && (
+            <span className="text-red-500">Required</span>
           )}
         </div>
       </div>
