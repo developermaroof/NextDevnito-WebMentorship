@@ -1,3 +1,4 @@
+// src/app/api/teacher/roadmaps/route.js
 import { connectionString } from "@/utils/db";
 import { roadmapSchema } from "@/utils/models/roadmapModel";
 import mongoose from "mongoose";
@@ -9,15 +10,21 @@ export async function POST(req) {
   const description = formData.get("description");
   const teacher_id = formData.get("teacher_id");
   const fileValue = formData.get("file") || "";
-  // Get resource_type from form data
   const resource_type = formData.get("resource_type") || "";
+  // Parse videos from formData
+  const videosJson = formData.get("videos");
+  let videos = [];
+  if (videosJson) {
+    videos = JSON.parse(videosJson);
+  }
 
   const payload = {
     title,
     description,
     teacher_id,
     file: fileValue,
-    resource_type, // Store resource_type in the database
+    resource_type,
+    videos, // Include videos array in the payload
   };
 
   await mongoose.connect(connectionString);
