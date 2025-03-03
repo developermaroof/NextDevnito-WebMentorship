@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 const Roadmaps = () => {
   const [roadmaps, setRoadmaps] = useState();
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
-  const [deletingId, setDeletingId] = useState(null); // Per-roadmap loading state
+  const [deletingId, setDeletingId] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -29,7 +29,7 @@ const Roadmaps = () => {
 
   const handleDeleteRoadmap = async (id) => {
     try {
-      setDeletingId(id); // Set the specific roadmap being deleted
+      setDeletingId(id);
       let response = await fetch(`/api/teacher/roadmaps/${id}`, {
         method: "DELETE",
       });
@@ -100,7 +100,10 @@ const Roadmaps = () => {
               <div key={index} className="relative border p-4 max-w-[300px]">
                 <div className="flex justify-between">
                   <div>
-                    <h2 className="font-bold">{item.title}</h2>
+                    <h2 className="font-bold">
+                      {item.title} ({item.videos ? item.videos.length : 0}{" "}
+                      videos)
+                    </h2>
                     <p>{item.description}</p>
                   </div>
                   <div className="relative">
@@ -161,13 +164,10 @@ const Roadmaps = () => {
                     )}
                   </div>
                 </div>
-
                 {item.file && (
                   <div className="mt-2">
-                    {/* Check if resource_type is "image" to display as thumbnail */}
                     {item.resource_type === "image" ? (
                       <div className="w-32 h-32">
-                        {/* Use Cloudinary transformation for 128x128 thumbnail */}
                         <img
                           src={item.file.replace(
                             "/upload/",

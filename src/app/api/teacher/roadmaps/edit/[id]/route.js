@@ -9,12 +9,19 @@ export async function PUT(req, context) {
     const { id } = context.params;
     const formData = await req.formData();
 
+    const videosJson = formData.get("videos");
+    let videos = [];
+    if (videosJson) {
+      videos = JSON.parse(videosJson);
+    }
+
     const payload = {
       title: formData.get("title") || "",
       description: formData.get("description") || "",
       teacher_id: formData.get("teacher_id") || "",
       file: formData.get("file") || "",
       resource_type: formData.get("resource_type") || "",
+      videos: videos,
     };
 
     const result = await roadmapSchema.findOneAndUpdate({ _id: id }, payload, {
